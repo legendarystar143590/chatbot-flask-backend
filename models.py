@@ -16,7 +16,7 @@ class User(db.Model):
     password = db.Column(db.String(), nullable=False)
     com_name = db.Column(db.String(), nullable=False)
     com_vat = db.Column(db.String(), nullable=False)
-    como_street = db.Column(db.String(), nullable=False)
+    com_street = db.Column(db.String(), nullable=False)
     com_phone = db.Column(db.String(), nullable=False)
     com_city = db.Column(db.String(), nullable=False)
     com_postal = db.Column(db.String(), nullable=False)
@@ -25,7 +25,7 @@ class User(db.Model):
     role = db.Column(db.String(), nullable = False, default = 'user')
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
-    def __init__(self, first_name, last_name, email, password, language):
+    def __init__(self, first_name, last_name, email, password, language, com_name, com_vat, com_street, com_phone, com_city, com_postal, com_country, com_website):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
@@ -33,7 +33,7 @@ class User(db.Model):
         self.language = language
         self.com_name = com_name
         self.com_vat = com_vat
-        self.como_street = com_street
+        self.com_street = com_street
         self.com_phone = com_phone
         self.com_city = com_city
         self.com_postal = com_postal

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_migrate import Migrate
+from api.auth import user_blueprint
 
 from models import db, User
 app = Flask(__name__)
@@ -18,6 +19,8 @@ db.init_app(app)
 
 migrate = Migrate(app, db)
 CORS(app)
+
+app.register_blueprint(user_blueprint, url_prefix='/api')
 
 @app.route("/")
 def index():

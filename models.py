@@ -76,3 +76,53 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User {self.first_name}>"
+
+class Bot(db.Model):
+    __tablename__ = 'bots'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = db.Column(db.String(), nullable=True)
+    avatar = db.Column(db.String(), nullable=False)
+    color = db.Column(db.String(), nullable=False)
+    active = db.Column(db.Integer, nullable=False)
+    start_time = db.Column(db.String(), nullable=False)
+    end_time = db.Column(db.String(), nullable=False)
+    knowledge_base = db.Column(db.String(), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, name, avatar, color, active, start_time, end_time, knowledge_base):
+        self.name = name
+        self.avatar = avatar
+        self.color = color
+        self.active = active
+        self.start_time = start_time
+        self.end_time = end_time
+        self.knowledge_base = knowledge_base
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(bot_id):
+        return Bot.query.get(bot_id)
+    
+    @staticmethod
+    def get_all_bots():
+        return Bot.query.all()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'avatar': self.avatar,
+            'color': self.color,
+            'active': self.active,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'knowledge_base': self.knowledge_base,
+            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+        }
+
+    def __repr__(self):
+        return f"<Bot {self.name}>"

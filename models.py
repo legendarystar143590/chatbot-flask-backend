@@ -48,12 +48,28 @@ class User(db.Model):
             return True
         return False
     
-    def get_by_username(name):        
-        db_user = User.query.filter(User.name == name).first()
+    def get_by_userID(name):        
+        db_user = User.query.filter(User.id == name).first()
         return db_user
     
     def json(self):
-        return {'id': self.id, 'first_name':self.first_name, 'last_name':self.last_name}
-    
+        return {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'language': self.language,
+            'password': self.password,  # Note: It's generally not safe to include password information here.
+            'com_name': self.com_name,
+            'com_vat': self.com_vat,
+            'com_street': self.com_street,
+            'com_phone': self.com_phone,
+            'com_city': self.com_city,
+            'com_postal': self.com_postal,
+            'com_country': self.com_country,
+            'com_website': self.com_website,
+            'role': self.role
+        }
+
     def __repr__(self):
         return f"<User {self.first_name}>"

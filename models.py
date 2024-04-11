@@ -47,6 +47,9 @@ class User(db.Model):
             db.session.commit()
             return True
         return False
+
+    def save(self):
+        db.session.commit()
     
     def get_by_userID(name):        
         db_user = User.query.filter(User.id == name).first()

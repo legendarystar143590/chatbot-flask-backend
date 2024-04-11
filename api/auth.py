@@ -32,7 +32,7 @@ def login():
         # Check if the provided password matches the stored password hash
         if check_password_hash(user.password, data['password']):
             # token = create_access_token(identity=user.id)
-            response = jsonify({'message': True, 'useId':user.id})
+            response = jsonify({'message': True, 'userID':user.id})
             # set_access_cookies(response, token)
 
             return response, 200
@@ -94,5 +94,29 @@ def get_user():
     user = User.get_by_userID(userID)
     if user:
         return user.json(), 200
+    else:
+        return jsonify({'error': 'Not found user!'}), 400
+
+@user_blueprint.route('update_user', methods=['POST'])
+@cross_origin()
+def update_user():
+    data = request.get_json()
+    user = User.get_by_userID(data['userID'])
+    if user:
+        user.first_name = data['first_name']
+        user.last_name = data['last_name']
+        user.email = data['email']
+        user.language = data['language']
+        user.password = generate_password_hash(data['password'])
+        user.com_name = data['com_name']
+        user.com_vat = data['com_vat']
+        user.com_street = data['com_street']
+        user.com_city = data['com_city']
+        user.com_country = data['com_country']
+        user.com_phone = data['com_phone']
+        user.com_website = data['com_website']
+        user.com_postal = data['com_postal']
+        user.save()
+        return jsonify({'message': 'Success'}), 201
     else:
         return jsonify({'error': 'Not found user!'}), 400

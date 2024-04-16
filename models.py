@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask import current_app
 from sqlalchemy.sql import func
 from datetime import datetime
 from uuid import uuid4
@@ -54,6 +55,19 @@ class User(db.Model):
     def get_by_userID(name):        
         db_user = User.query.filter(User.id == name).first()
         return db_user
+
+    def get_reset_token(self, expires_sec=1800): #<---HERE
+        s=Serializer(current_app.config['SECRET_KEY'], expires_sec) #<---HERE
+        return s.dumps({'user_id': self.id}).decode('utf-8') #<---HERE
+
+    @staticmethod#<-- HERE-This means self is not an argument the function should expect
+    def verify_reset_token(token): #<---HERE
+        s=Serializer(current_app.config['SECRET_KEY']) #<---HERE
+        try: #<---HERE
+            user_id = s.loads(token)['user_id'] #<---HERE
+        except: #<---HERE
+            return None #<---HERE
+        return Users.query.get(user_id) #<---HERE
     
     def json(self):
         return {
@@ -126,3 +140,151 @@ class Bot(db.Model):
 
     def __repr__(self):
         return f"<Bot {self.name}>"
+
+class Document(db.Model):
+    __tablename__ = 'documents'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    type = db.Column(db.String(), nullable=False)
+    filename = db.Column(db.String(), nullable=False)
+    unique_id = db.Column(db.String(), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, type, filename, unique_id):
+        self.type = type
+        self.filename = filename
+        self.unique_id = unique_id
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return Document.query.get(id)
+    
+    @staticmethod
+    def get_all_documents():
+        return Document.query.all()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'filename': self.filename,
+            'unique_id': self.unique_id,
+            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+        }
+
+    def __repr__(self):
+        return f"<Document {self.name}>"
+
+class Website(db.Model):
+    __tablename__ = 'websites'
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    url = db.Column(db.String(), nullable=True)
+    unique_id = db.Column(db.String(), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, url, unique_id):
+        self.url = url
+        self.unique_id = unique_id
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return Website.query.get(id)
+    
+    @staticmethod
+    def get_all_websites():
+        return Website.query.all()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'url': self.url,
+            'unique_id': self.unique_id,
+            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+        }
+
+    def __repr__(self):
+        return f"<Website {self.name}>"
+
+class Text(db.Model):
+    __tablename__ = 'texts'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    question = db.Column(db.String(), nullable=True)
+    answer = db.Column(db.String(), nullable=True)
+    unique_id = db.Column(db.String(), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, question, answer, unique_id):
+        self.question = question
+        self.answer = answer
+        self.unique_id = unique_id
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return Text.query.get(id)
+    
+    @staticmethod
+    def get_all_texts():
+        return Text.query.all()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'question': self.question,
+            'answer': self.answer,
+            'unique_id': self.unique_id,
+            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+        }
+
+    def __repr__(self):
+        return f"<Text {self.name}>"
+
+class KnowledgeBase(db.Model):
+    __tablename__ = 'knowledgebases'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = db.Column(db.String(), nullable=False)
+    unique_id = db.Column(db.String(), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, name, unique_id, user_id):
+        self.name = name
+        self.unique_id = unique_id
+        self.user_id = user_id
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return KnowledgeBase.query.get(id)
+    
+    @staticmethod
+    def get_all_knowledgebases():
+        return knowledgeBase.query.all()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'user_id': self.user_id,
+            'unique_id': self.unique_id,
+            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+        }
+
+    def __repr__(self):
+        return f"<KnowledgeBase {self.name}>"

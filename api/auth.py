@@ -1,9 +1,14 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
+from flask_mail import Mail, Message
+from provider.mail import mail
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from models import User
 import logging
+import hashlib
+
 
 user_blueprint = Blueprint('user_blueprint', __name__)
 
@@ -120,3 +125,40 @@ def update_user():
         return jsonify({'message': 'Success'}), 201
     else:
         return jsonify({'error': 'Not found user!'}), 400
+
+@user_blueprint.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    email = request.json.get('email')
+    url = request.host_url + 'reset/l'
+    print(email)
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+    s = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
+    token = s.dumps(email, salt=user.password)
+
+    msg = Message('Password Reset Link', sender='legendarystar143590@gmail.com', recipients=[email])
+    link = url_for('user_blueprint.reset_with_token', token=token, _external=True)
+
+    msg.body = f'Your link to reset your password is {link}. This link will expire in 1 hour.'
+    mail.send(msg)
+
+    return jsonify({'message': 'Password reset link sent to email!'}), 200
+
+@user_blueprint.route('/reset/<token>', methods=['GET', 'POST'])
+def reset_with_token(token):
+    try:
+        email = s.loads(token, salt='email-reset', max_age=3600)
+    except SignatureExpired:
+        return jsonify({'message': 'The password reset link is expired'}), 400
+
+    # GET request to show password reset form or POST request to update password
+    if request.method == 'POST':
+        new_password = request.json.get('password')
+        hashed_password = hash_function(new_password) # Replace with your actual hash function
+        user = User.query.filter_by(email=email).first()
+        user.password = hashed_password
+        # ... Save the user object ...
+        return jsonify({'message': 'Your password has been updated!'}), 200
+    

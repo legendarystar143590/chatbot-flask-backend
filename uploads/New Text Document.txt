@@ -1,0 +1,178 @@
+
+https://soul-3.gitbook.io/
+
+I will be sharing my thoughts on a missing market that has huge money in it and could potentially be a game changer in the space.
+
+
+However, the problem arise when there is a burnt liquidity and a "dead" market, a market with essentially no buying or selling left anymore. 
+
+This is due to many reasons, but the notable ones are that the market has lost its momentum
+
+I have noted that there is a new meme coin created every 5 minutes, thats about 12 every hour. In every hour, there is a meme coin that has its liquidity burnt, and many more failing thereafter.
+
+
+unused, untaped and unaffected liquidity -
+
+$1000 of missing liquidity per hour
+$1000 * 20 = $20000 per day
+$600,000 worth in a month. 
+
+
+Paln - 
+addressing the issues of security to investors, 
+combined with a smart system to retain such value on the solana network, 
+(1. Solve investor's issue, 2. retain(keep) such value on the solana network)
+I plan to create a protocol that solves these two markets. $SSOUL
+
+
+=========SOUL Ecosystem
+
+1.SOUL's Liquidity Systems
+
+User create his token on SOUL platform
+marketcap reaches 69K, then the raised sol is routed as following
+
+add liquidity with most sol and tokens and released on raydium,
+the liquidity token is sent to Soul's liquidity Locker
+
+then =>
+the risk of ruin through means of liquidity removal is negated(disappeared). 
+(This ensures security on the project passed through into raydium.)
+
+
+The second feature of the sol locker is the harvesting of dead liquidity.
+(When a project is deemed "dead" through relative variables that can be adjusted and agreed upon[Dead1.0], the liquidity will be unlocked and removed from the market. )
+
+extracted Sol => (SOUL/SOL) => SOUL token 
+(Alternative measures are addressed further under Dead1.0)
+
+
+2.SOUL Platform
+The goal of the SOUL Platform is to drive traffic towards the adoption of the Soul Ecosystem. 
+
+work - creation of memecoin tokens by developers into the solana ecosystem, facilitate the built up of dead1.0 liquidity for SOUL token. (dead1.0 liquidity)
+
+
+The main page will have a 2 click token creation system, with a page refreshing every second for tokens being bought or new tokens being created. 
+
+
+The platform should have these integrations in:
+- token creation
+-A chart to show the price of the token
+-details of the token itself
+-a buy and sell button with the ability to add a comment on the token thread itself
+-a display of holders for transparency purposes.
+-the existing marketcap of the token with constant refresh features so people are aware on the price of the token proportional to its marketcap.
+Additional features:
+The display of the SOUL token and its chart. 
+
+
+3. Dead1.0
+Dead1.0 Current variables proposed are as such: tokens having an accumulative trading volume <$1000 in trading volume for the past 5 days will be deemed Dead.
+
+Dead1.0 - past 5 days - trading volume less than $1000
+
+Dead1.0 liquidity => directly into a SOUL/SOL pool
+ into a LP farm of SOUL/SOL, where participants can add their own liquidity and stake their liquidity tokens on the LP farm
+
+
+4. Competition Analysis
+token creation platform - pumpfun, pinksale
+
+Our selling point will be Product Differentiation.
+
+
+Soul platform - 
+
+-ease of token creation
+-rug-free risk
+-market shifts to raydium and liquidity tokens are sent to the SOUL Liquidity Locker.  liquidity token => not user, locker
+-value is extracted out from projects that fails due to the underlying reasons mentioned under The Problem
+
+
+5. Revenue
+
+The SOUL platform will operate under two revenue streams in a flywheel system.
+
+1. Market participants will incur a 0.1% fee on every buy and sell of a meme coin within the SOUL platform. 
+2. markets affected by DEAD1.0 will give additional value to the liquidity of the SOUL token. This will boost active market participation of the SOUL token and also bring traffic to the platform itself.
+
+
+6. Adoption
+
+Airdrops for beta users
+-to drive traffic towards our platform, we have to reward users and give them a reason to "why us"
+
+The Usecase for SOUL.
+-to be decided but the usecase should have medium-long term adoption.
+
+
+
+============================================================================
+
+I am an entrepreneur looking for a full time software developer to create a protocol that i have a vision in. I am not necessarily well funded and I do plan to bootstrap the project via a fundraising in the future once the beta product is released and is optimal.
+
+The project will be held on solana and it consists of a token contract creation and a web dapp that involves buying and selling tokens similar to pump.fun. Even better if the developer has experience with the website itself and knows exactly what I am looking for.
+
+I am planning to add a layer 2 consensus to the tech that exists on that website and I do have a whole gitbook written out in detail entailing my vision for the project itself.
+
+Rewards won't be given by the hourly or fixed at $10,000. I am looking for a developer who is keen on working on a profit sharing basis. I willl provide equity once the project launches and I will reimburse for the developer's effort on a bootstrap campaign when the time comes.
+
+What I am particularly looking for:
+Developers who do not desire to work on multiple projects and focus on a single project that could potentially yield much more.
+-developers who share the same vision that I do, and are not profit driven. The rewards come later and since i am not liquid at the moment, I cannot guarantee the funding for your work. However, if you do a good job, and if the project suceeds, you will be handsomely rewarded. THE MAIN EMPHASIS IS THAT THE DEVELOPER WILL WANT TO WORK TOWARDS THE IDEALS OF THE PROJECT ITSELF
+-Transparency in work. Face to Face calls are essential. I will not tolerate any form of anonymity when it comes to business. I hope to form meaningful relationships and to cater to the interests between developers and myself so this project can suceed
+
+Relevant skillsets
+-Must have had experience with blockchain development ( mainly SOLANA contracts)
+- Must have experience creating websites that are optimized for high traffic. There isn't a need for complicated tech on the website end.
+-Must be efficient in delivering solidity code. To solve solutions within the least code as possible to reduce gas costs in the network and for efficient delivery
+-To have a proficiency of English and to communicate well.
+-To be idealistic and willing to think on a broad spectrum, being able to connect the dots.
+-To be goal driven and not Profit driven. This will potentially be a long term partnership, not just a "create and go". 
+
+Some considerations on finding the right developers ( personal ones)
+-critical. When i show stats or instructions, I want the developer to be critical on whatever should be done better. This gives me confidence on your abilities.
+-To be future-oriented. Being able to pace the project so you know what fits exactly where and the timeline is followed per plan.
+
+
+
+
+
+====================================================================================================================
+pump.fun
+
+
+Here are my some question.
+1. do we need to wait until current token marketcap reaches 69K for add liquidity?
+
+Yes. Since people can randomly create any memecoin they want on SOUL platform, I expect alot of memecoin being created every minute. This means there are way too many memecoins. We do not know which ones will do well since not all will do well.
+That leaves the 69k marketcap rule ( although it can be changed). If a project has enough traction and hype and hits 69k marketcap, we will then taking the sol raised for that token and automatically adding liquidity on raydium.
+For projects that do not hit 69k marketcap, they tend to stay around 10-40k, with buys and sells trying to hit 69k. We can take advantage of the 0.1% fee structure to earn revenue from the volume and frequency of memecoins created.
+
+
+2. after user adds liquidity via SOUL platform, does Soul's liquidity locker receive the liquidity token? not user receive?
+If yes, what does user receive from our Soul platform?
+
+No user adds liquidity. You only need to
+1) Create a memecoin token ( costs 0.02 sol)
+2) buy or sell a memecoin token ( there is no liquidity pool, just a virtual bonding)
+Please reference to pump.fuj for more details.
+
+Think of every new memecoin as a new sol wallet. Let\s assume SOL is $100. When the wallet hits 345 sol ($34500), we will take the 345 sol + tokens to add into a 69k marketcap pool, take the liquidity token and keep it to ourselves so no one can access it but us
+users will receive the tokens they bought and that\s it. Same goes for the owner based on what the owner sets.
+
+
+3. In a word, the meaning of harvesting of dead liquidity is to remove liquidity, swap extracted SOL to our SOUL token, right?
+That'is, it is same as enhancing our token pool (SOL/SOUL) with dead liquidity. right?
+Then we can get $600,000 worth in a month as you calculated.
+
+Correct. since the token is now \dead, we will remove liquidity, and add SOL/SOUL. We will not buy SOUL using the SOL extracted, but rather add liquidity to our token.
+
+
+4. how does use receive their harvesting result from SOUL platform?
+now it is used to enhance our token pool, if so user's reward?
+
+There\s no true benefit for users at this point. I do think that I want to incentivise them to create memecoins on our platform. so I plan to give 10% of the dead liquidity as rewards to the creator of the token. This means the owner is more motivated to try to get his token to hit 69k marketcap, and more people will trade around in the platform, giving higher fees.
+Overtime the SOUL/SOL token will have a very large liquidity pool and we can definitely utilise that to reward users of the platform.
+

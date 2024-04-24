@@ -3,7 +3,8 @@ from flask_cors import cross_origin
 from models import Document, Website, Text, KnowledgeBase
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.document_loaders import TextLoader
-from utils.provider import generate_kb_from_document, tiktoken_split
+from utils.provider import generate_kb_from_document, generate_kb_from_url,  tiktoken_text_split, tiktoken_doc_split 
+from utils.scraper import scrape_url
 import uuid
 import os
 from werkzeug.utils import secure_filename
@@ -37,6 +38,10 @@ def upload_document():
             new_website.save()
             # save_from_url(new_website.id, url)
             print(new_website.id)
+            text = scrape_url(url)
+            chunks = tiktoken_text_split(text)
+            type_of_knowledge = 'url'
+            generate_kb_from_url(chunks, unique_id, new_website.id, type_of_knowledge)
 
     for file in files:
         # Process each file (e.g., saving or using it)
@@ -52,10 +57,12 @@ def upload_document():
             loader = TextLoader(file_path, encoding='utf-8')
         data = loader.load()
         print("Data ?>>>>>", data)
-        chunks = tiktoken_split(data)
+
+        chunks = tiktoken_doc_split(data)
         new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
         new_doc.save()
-        generate_kb_from_document(chunks, unique_id, new_doc.id)
+        type_of_knowledge = 'pdf'
+        generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
         
         # After processing is done, delete the file
         if os.path.exists(file_path):
@@ -70,6 +77,10 @@ def upload_document():
         for qa in qas:
             new_qa = Text(question=qa["question"], answer=qa["answer"], unique_id=unique_id)
             new_qa.save()
+            text = f"Question: {qa['question']} Answer: {qa['answer']}"
+            chunks = tiktoken_text_split(text)
+            type_of_knowledge = 'qa'
+            generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
 
             print("QA ID>>>", new_qa.id)
 

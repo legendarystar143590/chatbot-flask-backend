@@ -1,18 +1,33 @@
-from utils.vectorizor import upsertDataToIndex
+from utils.vectorizor import upsertDocToIndex, upsertTextToIndex
 from langchain.text_splitter import CharacterTextSplitter
 
-def generate_kb_from_document(chunks, unique_id, doc_index):
+def generate_kb_from_document(chunks, unique_id, doc_index, _type):
     try:
-        upsertDataToIndex("aiana-knowledge-base", unique_id, doc_index, chunks)
+        upsertDocToIndex("aiana-knowledge-base", unique_id, doc_index, chunks, _type)
     except Exception as e:
         print("Generating the knoledgebase >>>" ,str(e))
         return - 1
 
-def tiktoken_split(text):
+def generate_kb_from_url(chunks, unique_id, doc_index, _type):
+    try:
+        upsertTextToIndex("aiana-knowledge-base", unique_id, doc_index, chunks, _type)
+    except Exception as e:
+        print("Generating the knoledgebase >>>" ,str(e))
+        return - 1
+
+def tiktoken_doc_split(text):
     text_splitter = CharacterTextSplitter(
                 separator = "\n", chunk_size=1000, chunk_overlap=200, length_function = len,
             )
     chunks = text_splitter.split_documents(text)
+    print("Chunks length >>>>", len(chunks))
+    return chunks
+
+def tiktoken_text_split(text):
+    text_splitter = CharacterTextSplitter(
+                separator = "\n", chunk_size=1000, chunk_overlap=200, length_function = len,
+            )
+    chunks = text_splitter.split_text(text)
     print("Chunks length >>>>", len(chunks))
     return chunks
 

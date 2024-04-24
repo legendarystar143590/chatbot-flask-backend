@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_cors import cross_origin
 from models import Document, Website, Text, KnowledgeBase
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import TextLoader
+from utils.provider import generate_kb_from_document, tiktoken_split
 import uuid
 import os
 from werkzeug.utils import secure_filename
@@ -38,12 +41,29 @@ def upload_document():
     for file in files:
         # Process each file (e.g., saving or using it)
         file.save('uploads/' + file.filename)
+        file_path = 'uploads/' + file.filename
         filename = file.filename
         extension = os.path.splitext(secure_filename(file.filename))[1]
+        loader = None
+        # print("extension is >>>>", extension)
+        if extension.lower() == ".pdf":
+            loader = PyMuPDFLoader(file_path)
+        elif extension.lower() == ".txt":
+            loader = TextLoader(file_path, encoding='utf-8')
+        data = loader.load()
+        print("Data ?>>>>>", data)
+        chunks = tiktoken_split(data)
         new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
         new_doc.save()
-
-        print("Doc ID >>> ", new_doc.id)
+        generate_kb_from_document(chunks, unique_id, new_doc.id)
+        
+        # After processing is done, delete the file
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            print(f"Deleted file: {file_path}")
+        else:
+            print(f"The file does not exist: {file_path}")
+            print("Doc ID >>> ", new_doc.id)
 
     if qas_json:
         qas = json.loads(qas_json)

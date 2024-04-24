@@ -2,8 +2,6 @@ from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
-from flask_mail import Mail, Message
-from provider.mail import mail
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from models import User
 import logging

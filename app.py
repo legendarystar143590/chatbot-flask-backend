@@ -6,7 +6,6 @@ from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from provider.mail import mail
 from api.auth import user_blueprint
 from api.bot import bot_blueprint
 from api.knowledge import knowledge_blueprint
@@ -32,7 +31,6 @@ app.config['MAIL_PASSWORD'] = 'allow me98415'
 jwt = JWTManager(app)
 
 db.init_app(app)
-mail.init_app(app)
 migrate = Migrate(app, db)
 # CORS(app, supports_credentials=True, origins=['https://your-frontend-domain.com'])
 CORS(app)

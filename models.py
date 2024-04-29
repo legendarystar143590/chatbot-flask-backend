@@ -96,7 +96,7 @@ class Bot(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    name = db.Column(db.String(), unique=True, nullable=True)
+    name = db.Column(db.String(), nullable=True)
     avatar = db.Column(db.LargeBinary, nullable = True)
     color = db.Column(db.String(), nullable=False)
     active = db.Column(db.Integer, nullable=False)
@@ -121,7 +121,7 @@ class Bot(db.Model):
 
     @staticmethod
     def get_by_id(bot_id):
-        return Bot.query.get(bot_id)
+        return Bot.query.filter_by(id=bot_id).first()
     
     @staticmethod
     def get_all_bots():
@@ -133,7 +133,7 @@ class Bot(db.Model):
             'name': self.name,
             'avatar': self.avatar,
             'color': self.color,
-            'active': self.active,
+            'active': self.active==1,
             'start_time': self.start_time,
             'end_time': self.end_time,
             'knowledge_base': self.knowledge_base,

@@ -37,11 +37,6 @@ def create_bot():
 
         return jsonify({'message': 'Success'}), 201
 
-    except IntegrityError as e:  # Catch integrity errors specifically
-        db.session.rollback()  # Rollback the session to a clean state
-        print(e)
-        return jsonify({'error':'A bot with this name already exists!'}), 409  # Return a conflict HTTP status code
-
     except Exception as e:
         print(e)
         return jsonify({'error':'Server is busy!'}), 500
@@ -50,7 +45,6 @@ def create_bot():
 def get_chatbots():
     try:
         user_id = request.args.get('userId')
-        print(user_id)
         if not user_id:
             return jsonify({'error': 'user_id is required'}), 400
 
@@ -69,3 +63,69 @@ def get_chatbots():
     except ValueError:
         # If the provided user_id cannot be converted to an integer, return an error
         return jsonify({'error': 'Invalid user_id format. It should be an integer.'}), 400
+
+@bot_blueprint.route('/get_chatbot', methods=['GET'])
+def get_chatbot():
+    try:
+        bot_id = request.args.get('botId')
+        if not bot_id:
+            return jsonify({'error': 'bot_id is required'}), 400
+
+        bot = Bot.query.filter_by(id=bot_id).first()
+        
+        bot_data = bot.json()
+        if bot.avatar:  # Check if the bot has an avatar
+            avatar_encoded = base64.b64encode(bot.avatar).decode('utf-8')  # Encode the binary data to base64
+            bot_data['avatar'] = f"data:image/png;base64,{avatar_encoded}"  # Prepend the necessary prefix
+        else:
+            bot_data['avatar'] = None  # No avatar case
+
+        return jsonify(bot_data), 200
+
+    except ValueError:
+        # If the provided user_id cannot be converted to an integer, return an error
+        return jsonify({'error': 'Invalid bot_id format. It should be an integer.'}), 400
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({'error': 'Server error.'}), 400
+
+@bot_blueprint.route('update_chatbot', methods=['POST'])
+def update_chatbot():
+    try:
+        botId = request.args.get('botId')
+        data = request.form
+        # Retrieve the existing knowledge base entry using the provided botId
+        bot = Bot.query.filter_by(id=botId).first()
+        if not bot:
+            return jsonify({"error": "Knowledge base entry not found."}), 404
+       
+        # Extract the relevant information from the form
+        name = data['name']
+        user_id = data['user_id']
+        avatar = request.files.get('avatar')
+        color = data['color'] 
+        active = data.get('active') == 'true'
+        start_time = data['start_time'] 
+        end_time = data['end_time'] 
+        knowledge_base = data['knowledge_base']
+        if avatar:
+            img_bytes = BytesIO()
+            avatar.save(img_bytes)
+            img_bytes.seek(0)
+            bin_image = img_bytes.read()
+        else:
+            bin_image = None
+        bot.name = name
+        bot.avatar = bin_image
+        bot.color = color
+        bot.active = active
+        bot.start_time = start_time
+        bot.end_time = end_time
+        bot.knowledge_base = knowledge_base
+        bot.save()
+
+        return jsonify({'message': 'Success'}), 201
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"error":"Server error"}), 500

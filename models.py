@@ -95,8 +95,9 @@ class Bot(db.Model):
     __tablename__ = 'bots'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = db.Column(db.String(), nullable=True)
-    avatar = db.Column(db.String(), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String(), unique=True, nullable=True)
+    avatar = db.Column(db.LargeBinary, nullable = True)
     color = db.Column(db.String(), nullable=False)
     active = db.Column(db.Integer, nullable=False)
     start_time = db.Column(db.String(), nullable=False)
@@ -104,7 +105,8 @@ class Bot(db.Model):
     knowledge_base = db.Column(db.String(), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, name, avatar, color, active, start_time, end_time, knowledge_base):
+    def __init__(self, user_id, name, avatar, color, active, start_time, end_time, knowledge_base):
+        self.user_id = user_id
         self.name = name
         self.avatar = avatar
         self.color = color

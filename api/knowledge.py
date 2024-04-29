@@ -56,7 +56,6 @@ def upload_document():
         elif extension.lower() == ".txt":
             loader = TextLoader(file_path, encoding='utf-8')
         data = loader.load()
-        print("Data ?>>>>>", data)
 
         chunks = tiktoken_doc_split(data)
         new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
@@ -85,3 +84,138 @@ def upload_document():
             print("QA ID>>>", new_qa.id)
 
     return {'status': 'success', 'message': f'Received {len(files)} files with name {name}'}
+
+@knowledge_blueprint.route('/get_knowledge_bases',methods=['GET'])
+def get_knowledgebases():
+    try:
+        user_id = request.args.get('userId')
+        print("GOT it>>>")
+        print(user_id)
+        if not user_id:
+            return jsonify({'error': 'user_id is required'}), 400
+
+        bases = KnowledgeBase.query.filter_by(user_id=user_id).all()
+        knowledge_bases_list = [base.json() for base in bases]
+        return jsonify(knowledge_bases_list), 200
+    except ValueError:
+        # If the provided user_id cannot be converted to an integer, return an error
+        return jsonify({'error': 'Invalid user_id format. It should be an integer.'}), 400
+
+@knowledge_blueprint.route('/get_knowledge_base',methods=['GET'])
+def get_knowledgebase():
+    try:
+        baseId = request.args.get('baseId')
+        print("GOT it>>>")
+        print(baseId)
+        if not baseId:
+            return jsonify({'error': 'baseId is required'}), 400
+
+        base = KnowledgeBase.query.filter_by(id=baseId).first()
+        websites = Website.query.filter_by(unique_id=base.unique_id).all()
+        websites_list = [website.json() for website in websites]
+        docs = Document.query.filter_by(unique_id=base.unique_id).all()
+        docs_list = [doc.json() for doc in docs]
+        print(docs_list)
+        texts = Text.query.filter_by(unique_id=base.unique_id).all()
+        texts_list = [text.json() for text in texts]
+        # Construct the response data dictionary
+        data = {
+            'base': base.json() if base else None,
+            'websites': websites_list,
+            'documents': docs_list,
+            'texts': texts_list,
+        }
+
+        return jsonify(data), 200
+
+    except Exception as e:
+        # Handle exceptions properly too
+        return jsonify({'error': str(e)}), 500
+
+@knowledge_blueprint.route('/update_knowledge_base/', methods=['POST'])
+def update_knowledge_base():
+    try:
+        unique_id = request.args.get('unique_id')
+        # Retrieve the existing knowledge base entry using the provided unique_id
+        knowledge_base_entry = KnowledgeBase.query.filter_by(unique_id=unique_id).first()
+        if not knowledge_base_entry:
+            return jsonify({"error": "Knowledge base entry not found."}), 404
+       
+        # Extract the relevant information from the form
+        name = request.form.get('name')
+        files = request.files.getlist('files')
+        qas_json = request.form.get('qa')
+        urls_json = request.form.get('urls')
+        user_id = request.form.get("userID")
+        # print("Requested Form data >>>>>",files)
+        if user_id is None:
+            return jsonify({"error": "Unauthorized request!"}), 405
+
+        if name:
+            knowledge_base_entry.name = name
+            knowledge_base_entry.save()
+
+        # Process URLs JSON if provided
+        if urls_json:
+            urls = json.loads(urls_json)
+            for url in urls:
+                # print(url['id'])
+                if len(urls) > 0 and url['id'] != -1:
+                    continue
+                new_website = Website(url=url['url'], unique_id=unique_id)
+                new_website.save()
+                # save_from_url(new_website.id, url)
+                print(new_website.id)
+                text = scrape_url(url['url'])
+                chunks = tiktoken_text_split(text)
+                type_of_knowledge = 'url'
+                generate_kb_from_url(chunks, unique_id, new_website.id, type_of_knowledge)
+                      
+        # Process uploaded files
+        if len(files) > 0:
+            for file in files:
+                file.save('uploads/' + file.filename)
+                file_path = 'uploads/' + file.filename
+                filename = file.filename
+                extension = os.path.splitext(secure_filename(file.filename))[1]
+                loader = None
+                # print("extension is >>>>", extension)
+                if extension.lower() == ".pdf":
+                    loader = PyMuPDFLoader(file_path)
+                elif extension.lower() == ".txt":
+                    loader = TextLoader(file_path, encoding='utf-8')
+                data = loader.load()
+
+                chunks = tiktoken_doc_split(data)
+                new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
+                new_doc.save()
+                type_of_knowledge = 'pdf'
+                generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
+                
+                # After processing is done, delete the file
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"Deleted file: {file_path}")
+                else:
+                    print(f"The file does not exist: {file_path}")
+                    print("Doc ID >>> ", new_doc.id)
+            
+        # Process Q&As if provided
+        if qas_json:
+            qas = json.loads(qas_json)
+            print(qas)
+            for qa in qas:
+                if qa.get('id') is None:
+                    new_qa = Text(question=qa["question"], answer=qa["answer"], unique_id=unique_id)
+                    new_qa.save()
+                    text = f"Question: {qa['question']} Answer: {qa['answer']}"
+                    chunks = tiktoken_text_split(text)
+                    type_of_knowledge = 'qa'
+                    generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
+
+        return jsonify({'status': 'success', 'message': f'Updated knowledge base entry with unique_id {unique_id}'})
+    except Exception as e:
+        print("Error: ", str(e))
+        return jsonify({'status':'error'}), 500
+
+        

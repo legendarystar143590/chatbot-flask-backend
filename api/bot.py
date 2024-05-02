@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
-from models import Bot
+from models import Bot, KnowledgeBase
 from sqlalchemy.exc import IntegrityError
 import uuid
 from io import BytesIO
@@ -74,12 +74,14 @@ def get_chatbot():
         bot = Bot.query.filter_by(id=bot_id).first()
         
         bot_data = bot.json()
+        # print(bot_data)
         if bot.avatar:  # Check if the bot has an avatar
             avatar_encoded = base64.b64encode(bot.avatar).decode('utf-8')  # Encode the binary data to base64
             bot_data['avatar'] = f"data:image/png;base64,{avatar_encoded}"  # Prepend the necessary prefix
         else:
             bot_data['avatar'] = None  # No avatar case
-
+        knowledge_base = KnowledgeBase.query.filter_by(unique_id=bot_data['knowledge_base']).first()
+        bot_data['knowledge_base'] = knowledge_base.name
         return jsonify(bot_data), 200
 
     except ValueError:

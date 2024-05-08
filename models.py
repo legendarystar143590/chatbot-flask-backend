@@ -290,3 +290,49 @@ class KnowledgeBase(db.Model):
 
     def __repr__(self):
         return f"<KnowledgeBase {self.name}>"
+
+class Conversation(db.Model):
+    __tablename__ = 'conversations'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    query = db.Column(db.String(), nullable=True)
+    response = db.Column(db.String(), nullable=True)
+    bot_id = db.Column(db.String(), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, query, response, bot_id):
+        self.query = query
+        self.response = response
+        self.bot_id = bot_id
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return Conversation.query.get(id)
+    
+    @staticmethod
+    def get_all_texts():
+        return Conversation.query.all()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'query': self.query,
+            'response': self.response,
+            'bot_id': self.bot_id,
+            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+        }
+
+    def __repr__(self):
+        return f"<Conversation {self.name}>"
+
+@staticmethod
+def get_latest_three_conversations_by_bot(bot_id):
+    return (Conversation.query
+            .filter_by(bot_id=bot_id)
+            .order_by(Conversation.created_at.desc())
+            .limit(3)
+            .all())

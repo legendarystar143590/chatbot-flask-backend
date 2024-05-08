@@ -1,7 +1,8 @@
-from utils.vectorizor import upsertDocToIndex, upsertTextToIndex
+from utils.vectorizor import upsertDocToIndex, upsertTextToIndex, get_answer
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
+
+
 
 def generate_kb_from_document(chunks, unique_id, doc_index, _type):
     try:
@@ -33,24 +34,11 @@ def tiktoken_text_split(text):
     print("Chunks length >>>>", len(chunks))
     return chunks
 
-def generate(user_id, bot_id, query):
-    template = """Based on the context, generate the answer."""
-        
-    end = """Context: {context}
-    Chat history: {chat_history}
-    Human: {human_input}
-    Your Response as Chatbot: """
-    
-    template += end
-    
-    prompt = PromptTemplate(
-        input_variables=["chat_history", "human_input", "context"],
-        template=template
-    )
-
-    memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
-
+def generate(bot_id, query, knowledge_base):
     
 
+    result = get_answer(bot_id, query, knowledge_base)
+
+    return result
     
     

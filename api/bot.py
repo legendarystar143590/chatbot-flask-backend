@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from models import Bot, KnowledgeBase
 from sqlalchemy.exc import IntegrityError
+from utils.provider import generate
 import uuid
 from io import BytesIO
 import os
@@ -130,4 +131,21 @@ def update_chatbot():
         return jsonify({'message': 'Success'}), 201
     except Exception as e:
         print("Error:", str(e))
-        return jsonify({"error":"Server error"}), 500
+        return jsonify({"error": "Server error"}), 500
+        
+@bot_blueprint.route('query', methods=['POST'])
+def query():
+    try:
+        data = request.get_json()
+        query = data['query']
+        bot_id = data['bot_id']
+        user_id = data['user_id']
+        if bot_id:
+            bot = Bot.query.filter_by(id=bot_id).first()
+        knowledge_base = bot.knowledge_base
+        result = generate(bot_id, query, knowledge_base)
+
+        return jsonify({'message': result}), 200
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error': 'Server Error'}), 500

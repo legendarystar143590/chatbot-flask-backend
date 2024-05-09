@@ -7,13 +7,14 @@ from uuid import uuid4
 # from langchain.vectorstores import Pinecone
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
+from langchain.prompts import PromptTemplate
 from langchain.chains.question_answering import load_qa_chain
 from langchain.memory import ConversationBufferMemory
 
 from pinecone import Pinecone, ServerlessSpec
 # from langchain.sql_database import SQLDatabase
-from models import KnowledgeBase, Conversation, get_latest_three_conversations_by_bot
+from models import Conversation
 # from langchain import LargeLanguageModel
 import os
 import base64
@@ -114,6 +115,7 @@ def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
         print("Error in upsertDataToIndex()", str(e))
         pass
 
+#  Generate the response
 def get_answer(bot_id, query, knowledge_base):
     try:
         template = """Based on the context, generate the answer."""
@@ -130,8 +132,9 @@ def get_answer(bot_id, query, knowledge_base):
             template=template
         )
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
+        
         docsearch = PineconeVectorStore.from_existing_index(
-                index_name=PINECONE_INDEX_NAME, embedding=embeddings)
+                index_name='aiana-knowledge-base', embedding=embeddings)
                 
         condition = {"collection_name": knowledge_base}
         
@@ -140,19 +143,21 @@ def get_answer(bot_id, query, knowledge_base):
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
         stuff_chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt, memory=memory)
-        latest_chat_history = get_latest_three_conversations_by_bot(bot_id)
+        print(bot_id)
+        latest_chat_history = Conversation.query.filter_by(bot_id=bot_id).order_by('created_at').limit(3).all()
+        print(latest_chat_history)
         reduce_chat_history = ""
         for index, record in enumerate(latest_chat_history):
             if index < 4:
-                print("Query => ", record.query)
+                print("Query => ", record.user_message)
                 print("Answer => ", record.response)
-                stuff_chain.memory.save_context({'human_input': record.query}, {'output': record.response})
-                reduce_chat_history += f"Human: {record.query}\nBot: {record.response}\n"
-                reduce_chain.memory.save_context({'human_input': record.query}, {'output': record.response})
+                stuff_chain.memory.save_context({'human_input': record.user_message}, {'output': record.response})
+                reduce_chat_history += f"Human: {record.user_message}\nBot: {record.response}\n"
+                # reduce_chain.memory.save_context({'human_input': record.user_message}, {'output': record.response})
             else:
                 record.delete()
         output = stuff_chain({"input_documents": docs, "human_input": query}, return_only_outputs=False)
-        new_conv = Conversation(bot_id, query, output["output_text"])
+        new_conv = Conversation(query, output["output_text"], bot_id)
         new_conv.save()
         return output["output_text"]
     except Exception as e:

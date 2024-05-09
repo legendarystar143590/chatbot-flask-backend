@@ -93,7 +93,7 @@ def get_chatbot():
         print("Error:", str(e))
         return jsonify({'error': 'Server error.'}), 400
 
-@bot_blueprint.route('update_chatbot', methods=['POST'])
+@bot_blueprint.route('/update_chatbot', methods=['POST'])
 def update_chatbot():
     try:
         botId = request.args.get('botId')
@@ -133,7 +133,7 @@ def update_chatbot():
         print("Error:", str(e))
         return jsonify({"error": "Server error"}), 500
         
-@bot_blueprint.route('query', methods=['POST'])
+@bot_blueprint.route('/query', methods=['POST'])
 def query():
     try:
         data = request.get_json()

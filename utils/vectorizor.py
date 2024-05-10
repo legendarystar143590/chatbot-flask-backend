@@ -118,9 +118,8 @@ def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
 #  Generate the response
 def get_answer(bot_id, query, knowledge_base):
     try:
-        template = """Based on the context, generate the answer."""
-        
-        end = """Context: {context}
+        template = """Find the anaswer only based on the input document. If there is no relevant info in the doucment, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'"""
+        end = """ Context: {context}
         Chat history: {chat_history}
         Human: {human_input}
         Your Response as Chatbot: """

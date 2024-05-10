@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
-from models import Bot, KnowledgeBase
+from models import Bot, KnowledgeBase, Conversation
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
 import uuid
@@ -149,3 +149,16 @@ def query():
     except Exception as e:
         print(str(e))
         return jsonify({'error': 'Server Error'}), 500
+
+@bot_blueprint.route('/del_messages', methods=['POST'])
+def del_messages():
+    try:
+        data = request.get_json()
+        bot_id = data['bot_id']
+        Conversation.del_by_bot_id(bot_id)
+        return jsonify({'status': 'success'}), 201
+        
+    except Exception as e:
+        print(str(e))
+        return jsonify({'status':'error'}), 500
+    

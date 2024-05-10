@@ -317,6 +317,17 @@ class Conversation(db.Model):
     def get_all_texts():
         return Conversation.query.all()
 
+    @classmethod
+    def del_by_bot_id(cls, bot_id):
+        """Deletes all conversations for a given bot_id"""
+        try:
+            num_rows_deleted = db.session.query(cls).filter(cls.bot_id == bot_id).delete()
+            db.session.commit()
+            return num_rows_deleted
+        except Exception as e:
+            db.session.rollback()
+            raise e
+            
     def json(self):
         return {
             'id': self.id,

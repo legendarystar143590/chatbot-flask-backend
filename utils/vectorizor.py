@@ -14,7 +14,7 @@ from langchain.memory import ConversationBufferMemory
 
 from pinecone import Pinecone, ServerlessSpec
 # from langchain.sql_database import SQLDatabase
-from models import Conversation
+from models import Conversation, Bot
 # from langchain import LargeLanguageModel
 import os
 import base64
@@ -118,13 +118,15 @@ def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
 #  Generate the response
 def get_answer(bot_id, query, knowledge_base):
     try:
-        template = """Find the anaswer only based on the input document. If there is no relevant info in the doucment, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'"""
+        bot = Bot.get_by_id(bot_id)
+        starter = "This is my name. So if user asks my name, please provide my name:" + bot.name + " something like My name is XXX. I am happy to help you today.\n"
+        template = """The name of the LLM is . Find the anaswer only based on the input document. If there is no relevant info in the doucment, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'"""
         end = """ Context: {context}
         Chat history: {chat_history}
         Human: {human_input}
         Your Response as Chatbot: """
         
-        template += end
+        template +=starter + end
         
         prompt = PromptTemplate(
             input_variables=["chat_history", "human_input", "context"],
@@ -142,7 +144,6 @@ def get_answer(bot_id, query, knowledge_base):
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
         stuff_chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt, memory=memory)
-        print(bot_id)
         latest_chat_history = Conversation.query.filter_by(bot_id=bot_id).order_by('created_at').limit(3).all()
         print(latest_chat_history)
         reduce_chat_history = ""

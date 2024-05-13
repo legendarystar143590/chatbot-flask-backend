@@ -140,10 +140,11 @@ def query():
         query = data['query']
         bot_id = data['bot_id']
         user_id = data['user_id']
+        session_id = data['session_id']
         if bot_id:
             bot = Bot.query.filter_by(id=bot_id).first()
         knowledge_base = bot.knowledge_base
-        result = generate(bot_id, query, knowledge_base)
+        result = generate(bot_id, session_id, query, knowledge_base)
 
         return jsonify({'message': result}), 200
     except Exception as e:

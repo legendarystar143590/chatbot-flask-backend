@@ -116,11 +116,12 @@ def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
         pass
 
 #  Generate the response
-def get_answer(bot_id, query, knowledge_base):
+def get_answer(bot_id, session_id, query, knowledge_base):
     try:
         bot = Bot.get_by_id(bot_id)
-        starter = "This is my name. So if user asks my name, please provide my name:" + bot.name + " something like My name is XXX. I am happy to help you today.\n"
-        template = """The name of the LLM is . Find the anaswer only based on the input document. If there is no relevant info in the doucment, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'"""
+        starter = "This is my name. So if user asks my name, please provide my name:" + bot.name + " something like My name is XXX. I am happy to help you today. The bot assists users with  the context of the context.\n"
+        template = """Reply to non-technical questions. For the technical question, find the anaswer only based on the input context.  If there is no relevant info in the doucment, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'
+        """
         end = """ Context: {context}
         Chat history: {chat_history}
         Human: {human_input}
@@ -144,7 +145,7 @@ def get_answer(bot_id, query, knowledge_base):
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
         stuff_chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt, memory=memory)
-        latest_chat_history = Conversation.query.filter_by(bot_id=bot_id).order_by('created_at').limit(3).all()
+        latest_chat_history = Conversation.get_by_session(session_id)
         print(latest_chat_history)
         reduce_chat_history = ""
         for index, record in enumerate(latest_chat_history):
@@ -157,7 +158,7 @@ def get_answer(bot_id, query, knowledge_base):
             else:
                 record.delete()
         output = stuff_chain({"input_documents": docs, "human_input": query}, return_only_outputs=False)
-        new_conv = Conversation(query, output["output_text"], bot_id)
+        new_conv = Conversation(query, output["output_text"], bot_id, session_id)
         new_conv.save()
         return output["output_text"]
     except Exception as e:

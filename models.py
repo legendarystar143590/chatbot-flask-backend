@@ -295,15 +295,17 @@ class Conversation(db.Model):
     __tablename__ = 'conversations'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    user_message = db.Column(db.String(), nullable=True)
-    response = db.Column(db.String(), nullable=True)
+    user_message = db.Column(db.String(), nullable=False)
+    response = db.Column(db.String(), nullable=False)
+    session_id = db.Column(db.String(), nullable=False)
     bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, user_message, response, bot_id):
+    def __init__(self, user_message, response, bot_id, session_id):
         self.user_message = user_message
         self.response = response
         self.bot_id = bot_id
+        self.session_id = session_id
     
     def save(self):
         db.session.add(self)
@@ -312,6 +314,10 @@ class Conversation(db.Model):
     @staticmethod
     def get_by_id(id):
         return Conversation.query.get(id).all()
+
+    @staticmethod
+    def get_by_session(id):
+        return Conversation.query.filter_by(session_id=id).order_by('created_at').limit(3).all()
     
     @staticmethod
     def get_all_texts():
@@ -327,7 +333,7 @@ class Conversation(db.Model):
         except Exception as e:
             db.session.rollback()
             raise e
-            
+
     def json(self):
         return {
             'id': self.id,

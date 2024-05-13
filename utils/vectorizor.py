@@ -120,7 +120,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
     try:
         bot = Bot.get_by_id(bot_id)
         starter = "This is my name. So if user asks my name, please provide my name:" + bot.name + " something like My name is XXX. I am happy to help you today. The bot assists users with  the context of the context.\n"
-        template = """Reply to non-technical questions. For the technical question, find the anaswer only based on the input context.  If there is no relevant info in the doucment, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'
+        template = """Only reply to non-technical questions such as about bot name and ability. If the question is about yourself like age or gender and etc, but you don't have any info, please reply with I have nothing but the name about myself. How can I help you with others?. For the technical question, find the anaswer only based on the input context.  If there is no relevant info in the doucment, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'
         """
         end = """ Context: {context}
         Chat history: {chat_history}

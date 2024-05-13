@@ -313,7 +313,7 @@ class Conversation(db.Model):
 
     @staticmethod
     def get_by_id(id):
-        return Conversation.query.get(id).all()
+        return Conversation.query.get(id).first()
 
     @staticmethod
     def get_by_session(id):
@@ -345,3 +345,137 @@ class Conversation(db.Model):
 
     def __repr__(self):
         return f"<Conversation {self.id}>"
+
+class Order(db.Model):
+    __tablename__ = 'orders'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    user_id = db.Column(db.String(), nullable=False)
+    email = db.Column(db.String(), nullable=False)
+    status = db.Column(db.String(), nullable=False)
+    content = db.Column(db.String(), nullable=False)
+    bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, user_id, bot_id, email, status, content):
+        self.user_id = user_id
+        self.bot_id = bot_id
+        self.email = email
+        self.status = status
+        self.content = content
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return Conversation.query.filter_by(id=id).first()
+
+    @staticmethod
+    def get_by_user(id):
+        return Conversation.query.filter_by(user_id=id).all()
+    
+    @staticmethod
+    def get_by_bot(id):
+        return Conversation.query.filter_by(bot_id=id).all()
+    
+    @staticmethod
+    def get_all_texts():
+        return Conversation.query.all()
+
+    @classmethod
+    def del_by_bot_id(cls, bot_id):
+        """Deletes all conversations for a given bot_id"""
+        try:
+            num_rows_deleted = db.session.query(cls).filter(cls.bot_id == bot_id).delete()
+            db.session.commit()
+            return num_rows_deleted
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        
+    @classmethod
+    def del_by_id(cls, id):
+        """Deletes all conversations for a given bot_id"""
+        try:
+            num_rows_deleted = db.session.query(cls).filter(cls.id == id).delete()
+            db.session.commit()
+            return num_rows_deleted
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def json(self):
+        return {
+            'id': self.id,
+            'user_id': self.id,
+            'email': self.email,
+            'bot_id': self.bot_id,
+            'status': self.status,
+            'content': self.content,
+            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+        }
+
+    def __repr__(self):
+        return f"<Conversation {self.id}>"
+    
+class ChatLog(db.Model):
+    __tablename__ = 'chatlogs'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    result = db.Column(db.String(), nullable=False)
+    session_id = db.Column(db.String(), nullable=False)
+    bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    ended_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+    def __init__(self, result, bot_id, session_id, created_at, ended_at):
+        self.result = result
+        self.created_at = created_at
+        self.ended_at = ended_at
+        self.bot_id = bot_id
+        self.session_id = session_id
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return ChatLog.query.get(id).first()
+
+    @staticmethod
+    def get_by_session(id):
+        return ChatLog.query.filter_by(session_id=id).first()
+    
+    @staticmethod
+    def get_all_texts():
+        return Conversation.query.all()
+
+    @classmethod
+    def del_by_bot_id(cls, bot_id):
+        """Deletes all conversations for a given bot_id"""
+        try:
+            num_rows_deleted = db.session.query(cls).filter(cls.bot_id == bot_id).delete()
+            db.session.commit()
+            return num_rows_deleted
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def json(self):
+        return {
+            'id': self.id,
+            'result': self.result,
+            'bot_id': self.bot_id,
+            'session_id': self.session_id,
+            'created_at': self.created_at.isoformat(),  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+            'ended_at': self.ended_at.isoformat()
+
+        }
+
+    def __repr__(self):
+        return f"<ChatLog {self.id}>"
+

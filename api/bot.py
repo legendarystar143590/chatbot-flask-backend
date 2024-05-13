@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
-from models import Bot, KnowledgeBase, Conversation
+from models import Bot, KnowledgeBase, Conversation, ChatLog
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
 import uuid
+from datetime import datetime
 from io import BytesIO
 import os
 import base64
@@ -141,12 +142,29 @@ def query():
         bot_id = data['bot_id']
         user_id = data['user_id']
         session_id = data['session_id']
+        currentDateAndTime = data['created_at']
+        created_at = datetime.fromisoformat(currentDateAndTime)
         if bot_id:
             bot = Bot.query.filter_by(id=bot_id).first()
         knowledge_base = bot.knowledge_base
         result = generate(bot_id, session_id, query, knowledge_base)
+        solve = True
+        status = 'In Progress'
+        if "If so leave me your email" in result:
+            solve = False
+            status = 'In Progress'
+        chat_log = ChatLog.get_by_session(session_id)
+        if chat_log:
+            print("Exists")
+            chat_log.ended_at = created_at
+            if chat_log.result is not 'In Progress':
+                chat_log.result = status
+            chat_log.save()
+        else:
+            new_log = ChatLog(status, bot_id, session_id, created_at, created_at)
+            new_log.save()
 
-        return jsonify({'message': result}), 200
+        return jsonify({'message': result, 'solve':solve}), 200
     except Exception as e:
         print(str(e))
         return jsonify({'error': 'Server Error'}), 500
@@ -156,6 +174,21 @@ def del_messages():
     try:
         data = request.get_json()
         bot_id = data['bot_id']
+        Conversation.del_by_bot_id(bot_id)
+        return jsonify({'status': 'success'}), 201
+        
+    except Exception as e:
+        print(str(e))
+        return jsonify({'status':'error'}), 500
+    
+@bot_blueprint.route('/book', methods=['POST'])
+def book():
+    try:
+        data = request.get_json()
+        bot_id = data['bot_id']
+        user_id = data['user_id']
+        email = data['email']
+        content = data['content']  
         Conversation.del_by_bot_id(bot_id)
         return jsonify({'status': 'success'}), 201
         

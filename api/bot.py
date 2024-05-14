@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
-from models import Bot, KnowledgeBase, Conversation, ChatLog
+from models import Bot, KnowledgeBase, Conversation, ChatLog, Order
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
 import uuid
@@ -189,10 +189,11 @@ def book():
         user_id = data['user_id']
         email = data['email']
         content = data['content']  
-        Conversation.del_by_bot_id(bot_id)
-        return jsonify({'status': 'success'}), 201
+        order = Order(user_id, bot_id, email, "progress", content)
+        order.save()
+        return jsonify({'message': 'success'}), 201
         
     except Exception as e:
         print(str(e))
-        return jsonify({'status':'error'}), 500
+        return jsonify({'message':'error'}), 500
     

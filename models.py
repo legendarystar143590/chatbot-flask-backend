@@ -350,15 +350,15 @@ class Order(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    user_id = db.Column(db.String(), nullable=False)
+    sessoin_id = db.Column(db.String(), nullable=False)
     email = db.Column(db.String(), nullable=False)
     status = db.Column(db.String(), nullable=False)
     content = db.Column(db.String(), nullable=False)
     bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, user_id, bot_id, email, status, content):
-        self.user_id = user_id
+    def __init__(self, sessoin_id, bot_id, email, status, content):
+        self.sessoin_id = sessoin_id
         self.bot_id = bot_id
         self.email = email
         self.status = status
@@ -373,8 +373,8 @@ class Order(db.Model):
         return Conversation.query.filter_by(id=id).first()
 
     @staticmethod
-    def get_by_user(id):
-        return Conversation.query.filter_by(user_id=id).all()
+    def get_by_session(id):
+        return Conversation.query.filter_by(sessoin_id=id).all()
     
     @staticmethod
     def get_by_bot(id):
@@ -385,10 +385,10 @@ class Order(db.Model):
         return Conversation.query.all()
 
     @classmethod
-    def del_by_bot_id(cls, bot_id):
+    def del_by_bot_id(cls, sessoin_id):
         """Deletes all conversations for a given bot_id"""
         try:
-            num_rows_deleted = db.session.query(cls).filter(cls.bot_id == bot_id).delete()
+            num_rows_deleted = db.session.query(cls).filter(cls.sessoin_id == sessoin_id).delete()
             db.session.commit()
             return num_rows_deleted
         except Exception as e:
@@ -409,7 +409,7 @@ class Order(db.Model):
     def json(self):
         return {
             'id': self.id,
-            'user_id': self.id,
+            'sessoin_id': self.sessoin_id,
             'email': self.email,
             'bot_id': self.bot_id,
             'status': self.status,

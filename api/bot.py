@@ -149,7 +149,7 @@ def query():
         knowledge_base = bot.knowledge_base
         result = generate(bot_id, session_id, query, knowledge_base)
         solve = True
-        status = 'In Progress'
+        status = 'Solved'
         if "If so leave me your email" in result:
             solve = False
             status = 'In Progress'
@@ -186,11 +186,14 @@ def book():
     try:
         data = request.get_json()
         bot_id = data['bot_id']
-        user_id = data['user_id']
+        session_id = data['session_id']
         email = data['email']
         content = data['content']  
-        order = Order(user_id, bot_id, email, "progress", content)
+        order = Order(session_id, bot_id, email, "progress", content)
         order.save()
+        chat_log = ChatLog.get_by_session(session_id)
+        chat_log.result = 'Email-Sent'
+        chat_log.save()
         return jsonify({'message': 'success'}), 201
         
     except Exception as e:

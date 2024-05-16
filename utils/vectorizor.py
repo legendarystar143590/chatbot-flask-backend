@@ -145,7 +145,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
         stuff_chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt, memory=memory)
-        latest_chat_history = Conversation.get_by_session(session_id)
+        latest_chat_history = Conversation.get_latest_by_session(session_id)
         print(latest_chat_history)
         reduce_chat_history = ""
         for index, record in enumerate(latest_chat_history):

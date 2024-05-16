@@ -138,30 +138,25 @@ def update_chatbot():
 def query():
     try:
         data = request.get_json()
-        query = data['query']
-        bot_id = data['bot_id']
-        user_id = data['user_id']
-        session_id = data['session_id']
-        currentDateAndTime = data['created_at']
+        query = data['input']
+        bot_id = data['botId']
+        user_id = data['userId']
+        session_id = data['sessionId']
+        currentDateAndTime = data['createdAt']
         created_at = datetime.fromisoformat(currentDateAndTime)
         if bot_id:
             bot = Bot.query.filter_by(id=bot_id).first()
         knowledge_base = bot.knowledge_base
         result = generate(bot_id, session_id, query, knowledge_base)
         solve = True
-        status = 'Solved'
         if "If so leave me your email" in result:
             solve = False
-            status = 'In Progress'
         chat_log = ChatLog.get_by_session(session_id)
         if chat_log:
-            print("Exists")
             chat_log.ended_at = created_at
-            if chat_log.result is not 'In Progress':
-                chat_log.result = status
             chat_log.save()
         else:
-            new_log = ChatLog(status, bot_id, session_id, created_at, created_at)
+            new_log = ChatLog(user_id, bot.name, session_id, created_at, created_at)
             new_log.save()
 
         return jsonify({'message': result, 'solve':solve}), 200
@@ -185,8 +180,8 @@ def del_messages():
 def book():
     try:
         data = request.get_json()
-        bot_id = data['bot_id']
-        session_id = data['session_id']
+        bot_id = data['botId']
+        session_id = data['sessionId']
         email = data['email']
         content = data['content']  
         order = Order(session_id, bot_id, email, "progress", content)

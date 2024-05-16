@@ -316,8 +316,12 @@ class Conversation(db.Model):
         return Conversation.query.get(id).first()
 
     @staticmethod
-    def get_by_session(id):
+    def get_latest_by_session(id):
         return Conversation.query.filter_by(session_id=id).order_by('created_at').limit(3).all()
+    
+    @staticmethod
+    def get_by_session(id):
+        return Conversation.query.filter_by(session_id=id).all()
     
     @staticmethod
     def get_all_texts():
@@ -337,8 +341,9 @@ class Conversation(db.Model):
     def json(self):
         return {
             'id': self.id,
-            'user_message': self.query,
+            'user_message': self.user_message,
             'response': self.response,
+            'session_id':self.session_id,
             'bot_id': self.bot_id,
             'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
         }
@@ -424,18 +429,17 @@ class ChatLog(db.Model):
     __tablename__ = 'chatlogs'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    result = db.Column(db.String(), nullable=False)
     session_id = db.Column(db.String(), nullable=False)
-    bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
+    user_id = db.Column(db.String(), nullable=False)
+    bot_name = db.Column(db.Integer, db.ForeignKey('bots.name'))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     ended_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-
-    def __init__(self, result, bot_id, session_id, created_at, ended_at):
-        self.result = result
+    def __init__(self, user_id,  bot_name, session_id, created_at, ended_at):
         self.created_at = created_at
         self.ended_at = ended_at
-        self.bot_id = bot_id
+        self.bot_name = bot_name
+        self.user_id = user_id
         self.session_id = session_id
     
     def save(self):
@@ -449,6 +453,10 @@ class ChatLog(db.Model):
     @staticmethod
     def get_by_session(id):
         return ChatLog.query.filter_by(session_id=id).first()
+    
+    @staticmethod
+    def get_by_user(id):
+        return ChatLog.query.filter_by(user_id=id).all()
     
     @staticmethod
     def get_all_texts():
@@ -468,12 +476,11 @@ class ChatLog(db.Model):
     def json(self):
         return {
             'id': self.id,
-            'result': self.result,
-            'bot_id': self.bot_id,
+            'bot_name': self.bot_name,
+            'user_id': self.user_id,
             'session_id': self.session_id,
             'created_at': self.created_at.isoformat(),  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
             'ended_at': self.ended_at.isoformat()
-
         }
 
     def __repr__(self):

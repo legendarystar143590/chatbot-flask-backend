@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 from api.auth import user_blueprint
 from api.bot import bot_blueprint
 from api.knowledge import knowledge_blueprint
+from api.chatlog import log_blueprint
 from models import db, User
 
 app = Flask(__name__)
@@ -38,6 +39,7 @@ CORS(app)
 app.register_blueprint(user_blueprint, url_prefix='/api')
 app.register_blueprint(bot_blueprint, url_prefix='/api')
 app.register_blueprint(knowledge_blueprint, url_prefix='/api')
+app.register_blueprint(log_blueprint, url_prefix='/api')
 
 @app.route("/")
 def index():

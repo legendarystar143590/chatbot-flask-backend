@@ -176,22 +176,5 @@ def del_messages():
         print(str(e))
         return jsonify({'status':'error'}), 500
     
-@bot_blueprint.route('/book', methods=['POST'])
-def book():
-    try:
-        data = request.get_json()
-        bot_id = data['botId']
-        session_id = data['sessionId']
-        email = data['email']
-        content = data['content']  
-        order = Order(session_id, bot_id, email, "progress", content)
-        order.save()
-        chat_log = ChatLog.get_by_session(session_id)
-        chat_log.result = 'Email-Sent'
-        chat_log.save()
-        return jsonify({'message': 'success'}), 201
-        
-    except Exception as e:
-        print(str(e))
-        return jsonify({'message':'error'}), 500
+
     

@@ -359,12 +359,14 @@ class Order(db.Model):
     email = db.Column(db.String(), nullable=False)
     status = db.Column(db.String(), nullable=False)
     content = db.Column(db.String(), nullable=False)
-    bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    bot_name = db.Column(db.String(), db.ForeignKey('bots.name'))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, sessoin_id, bot_id, email, status, content):
+    def __init__(self, sessoin_id, user_id, bot_name, email, status, content):
         self.sessoin_id = sessoin_id
-        self.bot_id = bot_id
+        self.bot_name = bot_name
+        self.user_id = user_id
         self.email = email
         self.status = status
         self.content = content
@@ -375,25 +377,25 @@ class Order(db.Model):
 
     @staticmethod
     def get_by_id(id):
-        return Conversation.query.filter_by(id=id).first()
+        return Order.query.filter_by(id=id).first()
 
     @staticmethod
-    def get_by_session(id):
-        return Conversation.query.filter_by(sessoin_id=id).all()
+    def get_by_user(id):
+        return Order.query.filter_by(user_id=id).all()
     
     @staticmethod
-    def get_by_bot(id):
-        return Conversation.query.filter_by(bot_id=id).all()
+    def get_by_bot(name):
+        return Order.query.filter_by(bot_name=name).all()
     
     @staticmethod
     def get_all_texts():
-        return Conversation.query.all()
+        return Order.query.all()
 
     @classmethod
-    def del_by_bot_id(cls, sessoin_id):
-        """Deletes all conversations for a given bot_id"""
+    def del_by_user_id(cls, user_id):
+        """Deletes all orders for a given user_id"""
         try:
-            num_rows_deleted = db.session.query(cls).filter(cls.sessoin_id == sessoin_id).delete()
+            num_rows_deleted = db.session.query(cls).filter(cls.user_id == user_id).delete()
             db.session.commit()
             return num_rows_deleted
         except Exception as e:
@@ -402,7 +404,7 @@ class Order(db.Model):
         
     @classmethod
     def del_by_id(cls, id):
-        """Deletes all conversations for a given bot_id"""
+        """Deletes all orders for a given id"""
         try:
             num_rows_deleted = db.session.query(cls).filter(cls.id == id).delete()
             db.session.commit()
@@ -416,14 +418,15 @@ class Order(db.Model):
             'id': self.id,
             'sessoin_id': self.sessoin_id,
             'email': self.email,
-            'bot_id': self.bot_id,
+            'user_id': self.user_id,
+            'bot_name': self.bot_name,
             'status': self.status,
             'content': self.content,
             'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
         }
 
     def __repr__(self):
-        return f"<Conversation {self.id}>"
+        return f"<Order {self.id}>"
     
 class ChatLog(db.Model):
     __tablename__ = 'chatlogs'
@@ -485,4 +488,3 @@ class ChatLog(db.Model):
 
     def __repr__(self):
         return f"<ChatLog {self.id}>"
-

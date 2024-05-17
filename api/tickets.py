@@ -49,7 +49,6 @@ def del_ticket():
         data = request.get_json()
         ticketId = data['currentItem']
         orders = Order.del_by_id(ticketId)
-
         return jsonify({'status':'success'}), 201
 
     except Exception as e:

@@ -55,6 +55,12 @@ class User(db.Model):
     def get_by_userID(name):        
         db_user = User.query.filter(User.id == name).first()
         return db_user
+    
+    @staticmethod
+    def get_by_email(email):
+        user = User.query.filter_by(email=email).first()
+        return user
+
 
     def get_reset_token(self, expires_sec=1800): #<---HERE
         s=Serializer(current_app.config['SECRET_KEY'], expires_sec) #<---HERE

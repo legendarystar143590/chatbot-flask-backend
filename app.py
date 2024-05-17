@@ -20,11 +20,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_POOL_SIZE'] = 20
 app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
+
+app.config['SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'legendarystar143590@gmail.com'
-app.config['MAIL_PASSWORD'] = 'allow me98415'
+app.config['MAIL_USERNAME'] = 'legendarystar2160187@gmail.com'
+app.config['MAIL_PASSWORD'] = 'pksv wzbh wahl atbw'
 
 # app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 # app.config['JWT_COOKIE_SECURE'] = True  # Set to False if not using https

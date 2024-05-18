@@ -2,8 +2,6 @@ from utils.vectorizor import upsertDocToIndex, upsertTextToIndex, get_answer
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import PromptTemplate
 
-
-
 def generate_kb_from_document(chunks, unique_id, doc_index, _type):
     try:
         upsertDocToIndex("aiana-knowledge-base", unique_id, doc_index, chunks, _type)

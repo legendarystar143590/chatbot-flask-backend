@@ -7,6 +7,7 @@ from models import User
 from flask_mail import Mail, Message
 import logging
 import hashlib
+from datetime import timedelta
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -35,11 +36,9 @@ def login():
 
         # Check if the provided password matches the stored password hash
         if check_password_hash(user.password, data['password']):
-            # token = create_access_token(identity=user.id)
-            response = jsonify({'message': True, 'userID':user.id})
+            token = create_access_token(identity=user.id)
+            return jsonify({'token': token, 'userId':user.id}), 200
             # set_access_cookies(response, token)
-
-            return response, 200
         else:
             logging.debug("Password verification failed.")  # Additional debug information
             return jsonify({'error': 'Wrong credentials'}), 403
@@ -49,6 +48,7 @@ def login():
         return jsonify({'error': str(e)}), 500
 
 @user_blueprint.route('/register', methods=['POST'])
+@cross_origin()
 def register():
     data = request.get_json()
     if not data:
@@ -142,45 +142,38 @@ def forgot_password():
     url = request.host_url + 'reset/l'
     user = User.query.filter_by(email=email).first()
 
-    # Create a reset URL containing the token
-    reset_url = url_for(
-        'user_blueprint.reset_with_token',
-        token=token,
-        _external=True
-    )
-
-
     msg = Message('Password Reset Link', sender='legendarystar2160187@gmail.com', recipients=[email])
-    link = url_for('user_blueprint.reset_with_token', token=token, _external=True)
+
+    reset_url = f'http://localhost:3000/reset-password/{token}'
 
     emailContent = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reset Your Password</title>
-<style>
-    body {{ font-family: Arial, sans-serif; font-size: 16px; color: #333; }}
-    .container {{ width: 100%; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; }}
-    .button {{ display: block; width: 200px; height: 50px; margin: 20px auto; background-color: #4CAF50; color: white; border: none; border-radius: 5px; text-align: center; text-decoration: none; line-height: 50px; font-size: 16px; }}
-    .footer {{ font-size: 14px; text-align: center; color: #777; }}
-</style>
-</head>
-<body>
-<div class="container">
-    <h2>Reset Your Password</h2>
-    <p>Hello,</p>
-    <p>You recently requested to reset your password for your account. Click the button below to reset it.</p>
-    <a href="{link}" class="button">Reset Your Password</a>
-    <p>If you did not request a password reset, please ignore this email or contact support if you have questions.</p>
-    <p>Thanks,<br>Your Company Team</p>
-    <div class="footer">
-        <p>If you’re having trouble clicking the "Reset Your Password" button, copy and paste the URL below into your web browser:</p>
-        <p><a href="{link}">{link}</a></p>
-    </div>
-</div>
-</body>
-</html>"""
+        <html lang="en">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Password</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; font-size: 16px; color: #333; }}
+            .container {{ width: 100%; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; }}
+            .button {{ display: block; width: 200px; height: 50px; margin: 20px auto; background-color: #4CAF50; color: white; border: none; border-radius: 5px; text-align: center; text-decoration: none; line-height: 50px; font-size: 16px; text-color:white; font-weight:bold }}
+            .footer {{ font-size: 14px; text-align: center; color: #777; }}
+        </style>
+        </head>
+        <body>
+        <div class="container">
+            <h2>Reset Your Password</h2>
+            <p>Hello,</p>
+            <p>You recently requested to reset your password for your account. Click the button below to reset it.</p>
+            <a href="{reset_url}" class="button">Reset Your Password</a>
+            <p>If you did not request a password reset, please ignore this email or contact support if you have questions.</p>
+            <p>Thanks,<br>AIANA Team</p>
+            <div class="footer">
+                <p>If you’re having trouble clicking the "Reset Your Password" button, copy and paste the URL below into your web browser:</p>
+                <p><a href="{reset_url}">{reset_url}</a></p>
+            </div>
+        </div>
+        </body>
+        </html>"""
 
     msg.html = emailContent
     mail = Mail(current_app)
@@ -188,19 +181,26 @@ def forgot_password():
 
     return jsonify({'message': 'Password reset link sent to email!'}), 200
 
-@user_blueprint.route('/reset_with_token/<token>', methods=['GET', 'POST'])
-def reset_with_token(token):
-    # try:
-    #     email = s.loads(token, salt='email-reset', max_age=3600)
-    # except SignatureExpired:
-    #     return jsonify({'message': 'The password reset link is expired'}), 400
+@user_blueprint.route('/reset_with_token', methods=['GET', 'POST'])
+def reset_with_token():
+    data = request.get_json()
+    print(data)
+    password = data['password']
+    token = data['token']
+    print(current_app.config['JWT_SECRET_KEY'])
+    serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
+    try:
+        email = serializer.loads(token, salt='email-confirm', max_age=3600)
+        print(email)
+        user = User.get_by_email(email)
+        user.password = generate_password_hash(password)
+        user.save()
 
-    # # GET request to show password reset form or POST request to update password
-    # if request.method == 'POST':
-    #     new_password = request.json.get('password')
-    #     hashed_password = hash_function(new_password) # Replace with your actual hash function
-    #     user = User.query.filter_by(email=email).first()
-    #     user.password = hashed_password
-    #     # ... Save the user object ...
-    #     return jsonify({'message': 'Your password has been updated!'}), 200
-    pass
+        return jsonify({'message': 'success'}), 201
+        
+    except SignatureExpired:
+        return jsonify({'message': 'The password reset link is expired'}), 400
+
+    except Exception as e:
+        print(str(e))
+        return jsonify({'message':'Server Error'}), 500

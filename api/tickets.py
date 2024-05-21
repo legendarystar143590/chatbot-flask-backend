@@ -1,12 +1,14 @@
 from flask import Blueprint, request, jsonify, current_app
 from models import Bot, Order, ChatLog
 from utils.provider import generate
+from flask_jwt_extended import jwt_required
 from datetime import datetime
 
 ticket_blueprint = Blueprint('ticket_blueprint', __name__)
 
 
 @ticket_blueprint.route('/book', methods=['POST'])
+@jwt_required()
 def book():
     try:
         data = request.get_json()
@@ -27,6 +29,7 @@ def book():
         return jsonify({'message': 'error'}), 500
         
 @ticket_blueprint.route('/get_tickets', methods=['POST'])
+@jwt_required()
 def get_tickets():
     try:
         data = request.get_json()
@@ -44,6 +47,7 @@ def get_tickets():
         return jsonify({'error':'Server Error'}), 500
 
 @ticket_blueprint.route('/del_ticket', methods=['POST'])
+@jwt_required()
 def del_ticket():
     try:
         data = request.get_json()

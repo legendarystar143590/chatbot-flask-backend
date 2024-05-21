@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
+from flask_jwt_extended import jwt_required
 from flask_cors import cross_origin
 from models import Document, Website, Text, KnowledgeBase
 from langchain_community.document_loaders import PyMuPDFLoader
@@ -14,6 +15,7 @@ import json
 knowledge_blueprint = Blueprint('lknowledge_blueprintueprint', __name__)
 
 @knowledge_blueprint.route('/upload_document', methods=['POST'])
+@jwt_required()
 def upload_document():
     name = request.form['name']
     files = request.files.getlist('files')
@@ -86,6 +88,7 @@ def upload_document():
     return {'status': 'success', 'message': f'Received {len(files)} files with name {name}'}
 
 @knowledge_blueprint.route('/get_knowledge_bases',methods=['GET'])
+@jwt_required()
 def get_knowledgebases():
     try:
         user_id = request.args.get('userId')
@@ -102,6 +105,7 @@ def get_knowledgebases():
         return jsonify({'error': 'Invalid user_id format. It should be an integer.'}), 400
 
 @knowledge_blueprint.route('/get_knowledge_base',methods=['GET'])
+@jwt_required()
 def get_knowledgebase():
     try:
         baseId = request.args.get('baseId')
@@ -133,6 +137,7 @@ def get_knowledgebase():
         return jsonify({'error': str(e)}), 500
 
 @knowledge_blueprint.route('/update_knowledge_base/', methods=['POST'])
+@jwt_required()
 def update_knowledge_base():
     try:
         unique_id = request.args.get('unique_id')

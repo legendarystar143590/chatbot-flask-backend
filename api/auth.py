@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies
+from flask_jwt_extended import  create_access_token, create_refresh_token,  jwt_required, get_jwt_identity, set_access_cookies
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
@@ -7,7 +7,6 @@ from models import User
 from flask_mail import Mail, Message
 import logging
 import hashlib
-from datetime import timedelta
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -36,8 +35,9 @@ def login():
 
         # Check if the provided password matches the stored password hash
         if check_password_hash(user.password, data['password']):
-            token = create_access_token(identity=user.id)
-            return jsonify({'token': token, 'userId':user.id}), 200
+            access_token = create_access_token(identity=user.id)
+            refresh_token = create_refresh_token(identity=user.id)
+            return jsonify({'access_token': access_token, 'refresh_token':refresh_token, 'userId':user.id}), 200
             # set_access_cookies(response, token)
         else:
             logging.debug("Password verification failed.")  # Additional debug information
@@ -92,6 +92,7 @@ def register():
 
 @user_blueprint.route('get_user', methods=['POST'])
 @cross_origin()
+@jwt_required()
 def get_user():
     data = request.get_json()
     userID = data['userID']
@@ -103,6 +104,7 @@ def get_user():
 
 @user_blueprint.route('update_user', methods=['POST'])
 @cross_origin()
+@jwt_required()
 def update_user():
     data = request.get_json()
     user = User.get_by_userID(data['userID'])
@@ -181,7 +183,8 @@ def forgot_password():
 
     return jsonify({'message': 'Password reset link sent to email!'}), 200
 
-@user_blueprint.route('/reset_with_token', methods=['GET', 'POST'])
+@user_blueprint.route('/reset_with_token', methods = ['GET', 'POST'])
+@jwt_required()
 def reset_with_token():
     data = request.get_json()
     print(data)
@@ -204,3 +207,10 @@ def reset_with_token():
     except Exception as e:
         print(str(e))
         return jsonify({'message':'Server Error'}), 500
+
+@user_blueprint.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    current_user = get_jwt_identity()
+    new_access_token = create_access_token(identity=current_user)
+    return jsonify(access_token=new_access_token), 201

@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify, current_app
 from models import Bot, KnowledgeBase, Conversation, ChatLog, Order
+from flask_jwt_extended import jwt_required
 from utils.provider import generate
 from datetime import datetime
 log_blueprint = Blueprint('log_blueprint', __name__)
 
 @log_blueprint.route('/get_chat', methods=['POST'])
+@jwt_required()
 def get_chat():
     try:
         data = request.get_json()
@@ -30,6 +32,7 @@ def get_chat():
         return jsonify({'error':'Server Error!'}), 500
 
 @log_blueprint.route('/get_log_data', methods=['POST'])
+@jwt_required()
 def get_log_data():
     try:
         data = request.get_json()

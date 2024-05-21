@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from models import Bot, KnowledgeBase, Conversation, ChatLog, Order
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
 import uuid
@@ -9,11 +10,10 @@ from io import BytesIO
 import os
 import base64
 
-
-
 bot_blueprint = Blueprint('bot_blueprint', __name__)
 
 @bot_blueprint.route('/create_bot', methods=['POST'])
+@jwt_required()
 def create_bot():
     try:
         data = request.form
@@ -44,6 +44,7 @@ def create_bot():
         return jsonify({'error':'Server is busy!'}), 500
 
 @bot_blueprint.route('/get_chatbots', methods=['GET'])
+@jwt_required()
 def get_chatbots():
     try:
         user_id = request.args.get('userId')
@@ -67,6 +68,7 @@ def get_chatbots():
         return jsonify({'error': 'Invalid user_id format. It should be an integer.'}), 400
 
 @bot_blueprint.route('/get_chatbot', methods=['GET'])
+@jwt_required()
 def get_chatbot():
     try:
         bot_id = request.args.get('botId')
@@ -95,6 +97,7 @@ def get_chatbot():
         return jsonify({'error': 'Server error.'}), 400
 
 @bot_blueprint.route('/update_chatbot', methods=['POST'])
+@jwt_required()
 def update_chatbot():
     try:
         botId = request.args.get('botId')
@@ -135,6 +138,7 @@ def update_chatbot():
         return jsonify({"error": "Server error"}), 500
         
 @bot_blueprint.route('/query', methods=['POST'])
+@jwt_required()
 def query():
     try:
         data = request.get_json()
@@ -165,6 +169,7 @@ def query():
         return jsonify({'error': 'Server Error'}), 500
 
 @bot_blueprint.route('/del_messages', methods=['POST'])
+@jwt_required()
 def del_messages():
     try:
         data = request.get_json()

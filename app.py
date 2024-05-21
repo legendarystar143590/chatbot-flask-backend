@@ -12,6 +12,7 @@ from api.knowledge import knowledge_blueprint
 from api.chatlog import log_blueprint
 from api.tickets import ticket_blueprint
 from models import db, User
+from datetime import timedelta
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
@@ -27,6 +28,9 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'legendarystar2160187@gmail.com'
 app.config['MAIL_PASSWORD'] = 'pksv wzbh wahl atbw'
+
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=3)
 
 # app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 # app.config['JWT_COOKIE_SECURE'] = True  # Set to False if not using https

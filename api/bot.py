@@ -9,6 +9,7 @@ from datetime import datetime
 from io import BytesIO
 import os
 import base64
+from api.mautic import get_access_token
 
 bot_blueprint = Blueprint('bot_blueprint', __name__)
 
@@ -47,6 +48,7 @@ def create_bot():
 @jwt_required()
 def get_chatbots():
     try:
+        
         user_id = request.args.get('userId')
         if not user_id:
             return jsonify({'error': 'user_id is required'}), 400

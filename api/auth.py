@@ -7,6 +7,7 @@ from models import User
 from flask_mail import Mail, Message
 import logging
 import hashlib
+from api.mautic import get_access_token, create_user
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -37,7 +38,7 @@ def login():
         if check_password_hash(user.password, data['password']):
             access_token = create_access_token(identity=user.id)
             refresh_token = create_refresh_token(identity=user.id)
-            return jsonify({'access_token': access_token, 'refresh_token':refresh_token, 'userId':user.id}), 200
+            return jsonify({'accessToken': access_token, 'refreshToken':refresh_token, 'userId':user.id}), 200
             # set_access_cookies(response, token)
         else:
             logging.debug("Password verification failed.")  # Additional debug information
@@ -67,17 +68,19 @@ def register():
         com_country = data['com_country']
         com_name = data['com_name']
         com_vat = data['com_vat']
-        com_phone = data['com_phone']
+        com_street_number = data['com_street_number']
         com_postal = data['com_postal']
         com_website = data['com_website']
 
         # Create a new User instance
         new_user = User(first_name=first_name, last_name=last_name, email=email, password=password,
                         language=language, com_street=com_street, com_city=com_city, com_country=com_country,
-                        com_name=com_name, com_vat=com_vat, com_phone=com_phone, com_postal= com_postal, com_website=com_website)
+                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website)
         
         # Attempt to register the user
         if new_user.register_user_if_not_exist():
+            print("Starting...")
+            create_user(data)
             return jsonify({'message': 'User registered successfully'}), 201
         else:
             return jsonify({'error': 'User already exists'}), 409
@@ -119,7 +122,7 @@ def update_user():
         user.com_street = data['com_street']
         user.com_city = data['com_city']
         user.com_country = data['com_country']
-        user.com_phone = data['com_phone']
+        user.com_street_number = data['com_phone']
         user.com_website = data['com_website']
         user.com_postal = data['com_postal']
         user.save()

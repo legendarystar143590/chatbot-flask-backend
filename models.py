@@ -3,6 +3,7 @@ from flask import current_app
 from sqlalchemy.sql import func
 from datetime import datetime
 from uuid import uuid4
+from utils.common import get_language_name
 
 db = SQLAlchemy()
 
@@ -15,7 +16,9 @@ class User(db.Model):
     email = db.Column(db.String(), unique = True, nullable = False)
     language = db.Column(db.String(), unique = False, nullable = False)
     password = db.Column(db.String(), nullable=False)
-    com_name = db.Column(db.String(), nullable=False)
+    mauticId = db.Column(db.String(), nullable=False)
+    botsActive = db.Column(db.String(), nullable=False, default = 0)
+    com_name = db.Column(db.Integer, nullable=False)
     com_vat = db.Column(db.String(), nullable=False)
     com_street = db.Column(db.String(), nullable=False)
     com_street_number = db.Column(db.String(), nullable=False)
@@ -26,11 +29,13 @@ class User(db.Model):
     role = db.Column(db.String(), nullable = False, default = 'user')
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
-    def __init__(self, first_name, last_name, email, password, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website):
+    def __init__(self, first_name, last_name, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.password = password
+        self.mauticId = mauticId
+        self.botsActive = botsActive
         self.language = language
         self.com_name = com_name
         self.com_vat = com_vat
@@ -81,7 +86,9 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
-            'language': self.language,
+            'mauticId': self.mauticId,
+            'botsActive': self.botsActive,
+            'language': get_language_name(self.language),
             'password': self.password,  # Note: It's generally not safe to include password information here.
             'com_name': self.com_name,
             'com_vat': self.com_vat,

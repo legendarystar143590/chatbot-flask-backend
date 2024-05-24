@@ -3,11 +3,12 @@ from flask_jwt_extended import  create_access_token, create_refresh_token,  jwt_
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from models import User
+from models import User, Bot
 from flask_mail import Mail, Message
 import logging
 import hashlib
-from api.mautic import get_access_token, create_user
+from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic
+from utils.common import get_language_code
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -25,17 +26,23 @@ def login():
         password = data['password']
         user = User.query.filter_by(email=email).first()
 
-        print(user)
-
         if not user:
             return jsonify({'error': 'User not found.'}), 403
 
         # Debugging: Log the pulled user data and the provided password
         logging.debug(f"Pulled user data from DB: {user}")
         logging.debug(f"Provided password: {data['password']}")
-
+        mautic_data = {}
         # Check if the provided password matches the stored password hash
         if check_password_hash(user.password, data['password']):
+            total_bots = Bot.query.filter_by(user_id=user.id).count()
+            active_bots = Bot.query.filter_by(user_id=user.id, active=1).count()
+            mautic_data["language"] = user.language
+            mautic_data["bots_active"] = active_bots
+            mautic_data["bots_registered"] = total_bots
+            if login_mautic(mautic_data, user.mauticId) == 'error':
+                return jsonify({'error': 'Server is busy. Try again later!'}), 400
+                
             access_token = create_access_token(identity=user.id)
             refresh_token = create_refresh_token(identity=user.id)
             return jsonify({'accessToken': access_token, 'refreshToken':refresh_token, 'userId':user.id}), 200
@@ -61,7 +68,8 @@ def register():
         last_name = data['last_name']
         email = data['email']
         password = generate_password_hash(data['password'])
-        language = data['language']
+        language = get_language_code(data['language'])
+    
         # Company Info
         com_street = data['com_street']
         com_city = data['com_city']
@@ -71,16 +79,18 @@ def register():
         com_street_number = data['com_street_number']
         com_postal = data['com_postal']
         com_website = data['com_website']
-
+        data['language'] = language
+        mauticId = create_mautic_user(data)
+        if mauticId == 'error':
+            return jsonify({'error': 'User already exists'}), 409
         # Create a new User instance
-        new_user = User(first_name=first_name, last_name=last_name, email=email, password=password,
+        new_user = User(first_name=first_name, last_name=last_name, email=email, password=password, mauticId=76, botsActive=0,
                         language=language, com_street=com_street, com_city=com_city, com_country=com_country,
                         com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website)
         
         # Attempt to register the user
         if new_user.register_user_if_not_exist():
             print("Starting...")
-            create_user(data)
             return jsonify({'message': 'User registered successfully'}), 201
         else:
             return jsonify({'error': 'User already exists'}), 409
@@ -115,18 +125,21 @@ def update_user():
         user.first_name = data['first_name']
         user.last_name = data['last_name']
         user.email = data['email']
-        user.language = data['language']
+        user.language = get_language_code(data['language'])
         user.password = generate_password_hash(data['password'])
         user.com_name = data['com_name']
         user.com_vat = data['com_vat']
         user.com_street = data['com_street']
         user.com_city = data['com_city']
         user.com_country = data['com_country']
-        user.com_street_number = data['com_phone']
+        user.com_street_number = data['com_street_number']
         user.com_website = data['com_website']
         user.com_postal = data['com_postal']
+        data["botsActive"] = user.botsActive
+        if update_mautic_user(data, user.mauticId) == 'error':
+            return jsonify({'error': 'Not found user!'}), 400
         user.save()
-        return jsonify({'message': 'Success'}), 201
+        return jsonify({'message': 'success'}), 201
     else:
         return jsonify({'error': 'Not found user!'}), 400
 

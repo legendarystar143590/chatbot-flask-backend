@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
-from models import Bot, KnowledgeBase, Conversation, ChatLog, Order
+from models import Bot, KnowledgeBase, Conversation, ChatLog, Order, User
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
@@ -9,7 +9,7 @@ from datetime import datetime
 from io import BytesIO
 import os
 import base64
-from api.mautic import get_access_token
+from api.mautic import get_access_token, login_mautic
 
 bot_blueprint = Blueprint('bot_blueprint', __name__)
 
@@ -37,6 +37,18 @@ def create_bot():
             bin_image = None
         new_bot = Bot(user_id = user_id, name=name, avatar=bin_image, color=color, active=active, start_time=start_time, end_time=end_time, knowledge_base=knowledge_base)
         new_bot.save()
+        user = User.query.filter_by(id=user_id).first()
+        user.botsActive = int(user.botsActive) + 1
+        user.save()
+        mauticData = {}
+        total_bots = Bot.query.filter_by(user_id=user.id).count()
+        active_bots = Bot.query.filter_by(user_id=user.id, active=1).count()
+        mauticData["language"] = user.language
+        mauticData["bots_active"] = active_bots
+        mauticData["bots_registered"] = total_bots
+        if login_mautic(mauticData, user.mauticId) == 'error':
+            return jsonify({'error': 'Server is busy. Try again later!'}), 400
+
 
         return jsonify({'message': 'Success'}), 201
 

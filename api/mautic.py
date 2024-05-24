@@ -8,7 +8,7 @@ MAUTIC_CLIENT_SECRET = os.getenv('MAUTIC_CLIENT_SECRET')
 # Set up the Mautic API client
 
 
-def create_user(data):
+def create_mautic_user(data):
     try:
         payload =  {
             "firstname": data["first_name"],
@@ -22,7 +22,7 @@ def create_user(data):
             "company_city": data["com_city"],
             "company_country": data["com_country"],
             "company_website_url": data["com_website"],
-            "language": "en",
+            "language": data["language"],
             "aiana_status": "registered",
             "bots_active": 0,
             "aiana_environment": "TEST",
@@ -30,34 +30,125 @@ def create_user(data):
             "person_source":"APPLICATION",
         }
 
-        create_user_url = f'{MAUTIC_BASE_URL}/contacts/new'
+        create_user_url = f'{MAUTIC_BASE_URL}/api/contacts/new'
         print(create_user_url)
 
         access_token = get_access_token()
+        # print("Token", access_token)
         # Headers including the access token
         headers = {
             'Authorization': f'Bearer {access_token}',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
         }
 
         # Sending the POST request
         response = requests.post(create_user_url, data=payload, headers=headers)
-        print(response)
-        # Checking response
+        
+
+        print(response.status_code)
         if response.status_code == 201:
             print("User created successfully")
-            return response.json()  # or handle as needed
+            response_data = response.json()
+            contact_id = response_data['contact']['id']
+            # Checking response
+            print("Here is contact id", contact_id)
+            return contact_id
         else:
-            print("Failed to create user", response.text)
-            return None
+            return 'error'
+        
     except Exception as e:
         print(e)
+        return "Error"
+
+def update_mautic_user(data, mauticId):
+    try:
+        payload =  {
+            "firstname": data["first_name"],
+            "lastname": data["last_name"],
+            "email": data["email"],
+            "company_name": data["com_name"],
+            "company_vat": data["com_vat"],
+            "company_street": data["com_street"],
+            "company_street_number": data["com_street_number"],
+            "company_postal_code": data["com_postal"],
+            "company_city": data["com_city"],
+            "company_country": data["com_country"],
+            "company_website_url": data["com_website"],
+            "language": data["language"],
+            "aiana_status": "registered",
+            "bots_active": data["botsActive"],
+            "aiana_environment": "TEST",
+            "license": "FREE",
+        }
+
+        update_user_url = f'{MAUTIC_BASE_URL}/api/contacts/{mauticId}/edit'
+        print(update_user_url)
+
+        access_token = get_access_token()
+        # print("Token", access_token)
+        # Headers including the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json',
+        }
+
+        # Sending the POST request
+        response = requests.put(update_user_url, data=payload, headers=headers)
+        
+        print(response.status_code)
+        if response.status_code == 200:
+            print("User updated successfully")
+            response_data = response.json()
+            contact_id = response_data['contact']['id']
+            # Checking response
+            return contact_id
+        else:
+            return 'error'
+        
+    except Exception as e:
+        print(e)
+        return "Error"
+
+def update_bot_number(number):
+    try:
+        payload =  {
+            "bots_active": number,
+        }
+
+        update_user_url = f'{MAUTIC_BASE_URL}/api/update/{mauticId}'
+        print(update_user_url)
+
+        access_token = get_access_token()
+        # print("Token", access_token)
+        # Headers including the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json',
+        }
+
+        # Sending the POST request
+        response = requests.post(update_user_url, data=payload, headers=headers)
+        
+
+        print(response.status_code)
+        if response.status_code == 201:
+            print("User created successfully")
+            response_data = response.json()
+            contact_id = response_data['contact']['id']
+            # Checking response
+            return contact_id
+        else:
+            return 'error'
+        
+    except Exception as e:
+        print(e)
+        return "Error"
 
 def get_access_token():
     token_url = f'{MAUTIC_BASE_URL}/oauth/v2/token'
     data = {
-        'client_id': '1_2iy2ky40kr8ko48g0008k4osggwcg880s4ow8c8s4ogg888kw8',
-        'client_secret': '4cll695h3b8kscskgccc44ogg40s8cgcgosoo4wgc84k04ksok',
+        'client_id': MAUTIC_CLIENT_ID,
+        'client_secret': MAUTIC_CLIENT_SECRET,
         'grant_type':'client_credentials'
     }
 
@@ -80,4 +171,40 @@ def get_access_token():
         print(response.data)
         return resonse.status_code
 
+def login_mautic(data, mauticId):
+    try:
+        payload =  {
+            "language": data["language"],
+            "aiana_status": "active",
+            "bots_active": data["bots_active"],
+            "bots_registered": data["bots_registered"],
+        }
+
+        update_user_url = f'{MAUTIC_BASE_URL}/api/contacts/{mauticId}/edit'
+        print(update_user_url)
+
+        access_token = get_access_token()
+        # print("Token", access_token)
+        # Headers including the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json',
+        }
+
+        # Sending the POST request
+        response = requests.put(update_user_url, data=payload, headers=headers)
+        
+        print(response.status_code)
+        if response.status_code == 200:
+            print("User updated successfully")
+            response_data = response.json()
+            contact_id = response_data['contact']['id']
+            # Checking response
+            return contact_id
+        else:
+            return 'error'
+        
+    except Exception as e:
+        print(e)
+        return "Error"
 

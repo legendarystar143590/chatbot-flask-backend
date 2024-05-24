@@ -38,5 +38,4 @@ def generate(bot_id, session_id, query, knowledge_base):
     result = get_answer(bot_id, session_id, query, knowledge_base)
 
     return result
-    
-    
+  

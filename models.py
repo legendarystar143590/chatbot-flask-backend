@@ -58,7 +58,7 @@ class User(db.Model):
         db.session.commit()
     
     def get_by_userID(name):        
-        db_user = User.query.filter(User.id == name).first()
+        db_user = User.query.filter_by(id=name).first()
         return db_user
     
     @staticmethod

@@ -6,7 +6,11 @@ MAUTIC_BASE_URL = os.getenv('MAUTIC_BASE_URL')
 MAUTIC_CLIENT_ID = os.getenv('MAUTIC_CLIENT_ID')
 MAUTIC_CLIENT_SECRET = os.getenv('MAUTIC_CLIENT_SECRET')
 # Set up the Mautic API client
-
+language_dict = {
+    'en': 1,
+    'nl': 4,
+    'fr': 5
+}
 
 def create_mautic_user(data):
     try:
@@ -46,19 +50,28 @@ def create_mautic_user(data):
         
 
         print(response.status_code)
+        print(response.json())
         if response.status_code == 201:
             print("User created successfully")
             response_data = response.json()
             contact_id = response_data['contact']['id']
             # Checking response
             print("Here is contact id", contact_id)
-            return contact_id
+            registration_url = f'{MAUTIC_BASE_URL}/api/emails/{language_dict[data["language"]]}/contact/{contact_id}/send'
+            print(registration_url)
+            registration = requests.post(registration_url, headers=headers)
+            registration = registration.json()
+            if registration['success']:
+                print(registration['success'])
+                return contact_id
+            else:
+                return 'error'
         else:
             return 'error'
         
     except Exception as e:
         print(e)
-        return "Error"
+        return "error"
 
 def update_mautic_user(data, mauticId):
     try:
@@ -93,9 +106,10 @@ def update_mautic_user(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.put(update_user_url, data=payload, headers=headers)
+        response = requests.post(update_user_url, data=payload, headers=headers)
         
         print(response.status_code)
+        print(response.json())
         if response.status_code == 200:
             print("User updated successfully")
             response_data = response.json()
@@ -107,7 +121,7 @@ def update_mautic_user(data, mauticId):
         
     except Exception as e:
         print(e)
-        return "Error"
+        return "error"
 
 def update_bot_number(number):
     try:
@@ -142,7 +156,7 @@ def update_bot_number(number):
         
     except Exception as e:
         print(e)
-        return "Error"
+        return "error"
 
 def get_access_token():
     token_url = f'{MAUTIC_BASE_URL}/oauth/v2/token'
@@ -206,5 +220,73 @@ def login_mautic(data, mauticId):
         
     except Exception as e:
         print(e)
-        return "Error"
+        return "error"
 
+def mautic_reset_password(data, mauticId):
+    try:
+        payload =  {
+            "password_reset_link": data["password_reset_link"],
+        }
+
+        update_user_url = f'{MAUTIC_BASE_URL}/api/emails/2/contact/{mauticId}/send'
+        print(update_user_url)
+
+        access_token = get_access_token()
+        # print("Token", access_token)
+        # Headers including the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json',
+        }
+
+        # Sending the POST request
+        response = requests.put(update_user_url, data=payload, headers=headers)
+        
+        print(response.status_code)
+        if response.status_code == 200:
+            print("Sent password reset mail successfully")
+            response_data = response.json()
+            # Checking response
+            return response_data['success']
+        else:
+            return 'error'
+        
+    except Exception as e:
+        print(e)
+        return "error"
+
+def book_ticket(data, mauticId):
+    try:
+        payloads = {
+            "tokens": {
+                "ticket_url":data['link'],
+                "ticket_number": data['id'],
+                "created_at": data['created'],
+                }
+        }
+        book_ticket_url = f'{MAUTIC_BASE_URL}/api/emails/3/contact/{mauticId}/send'
+        print(book_ticket_url)
+
+        access_token = get_access_token()
+        # print("Token", access_token)
+        # Headers including the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json',
+        }
+
+        # Sending the POST request
+        response = requests.put(book_ticket_url, headers=headers, data = payloads)
+        
+        print(response.status_code)
+        if response.status_code == 200:
+            print("Booking ticket mail successfully")
+            response_data = response.json()
+            # Checking response
+            return response_data['success']
+        else:
+            return 'error'
+        
+    except Exception as e:
+        print(e)
+        return "error"

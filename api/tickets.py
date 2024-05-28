@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify, current_app
-from models import Bot, Order, ChatLog
+from models import Bot, Order, ChatLog, User
 from utils.provider import generate
 from flask_jwt_extended import jwt_required
 from datetime import datetime
+from api.mautic import book_ticket
 
 ticket_blueprint = Blueprint('ticket_blueprint', __name__)
 
@@ -11,6 +12,7 @@ ticket_blueprint = Blueprint('ticket_blueprint', __name__)
 @jwt_required()
 def book():
     try:
+        
         data = request.get_json()
         bot_id = data['botId']
         user_id = data['userId']
@@ -22,7 +24,15 @@ def book():
         chat_log = ChatLog.get_by_session(session_id)
         chat_log.result = 'Email-Sent'
         chat_log.save()
-        return jsonify({'message': 'success'}), 201
+        user = User.get_by_userID(user_id)
+        data['id'] = order.id
+        data['link'] = 'https://login.aiana.io/tickets'
+        data['created'] = order.created_at
+        if book_ticket(data, user.mauticId) != 'error':
+            return jsonify({'message': 'success'}), 201
+        else:
+            return jsonify({'message': 'error'}), 500
+
         
     except Exception as e:
         print(str(e))

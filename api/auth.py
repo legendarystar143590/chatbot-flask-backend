@@ -4,7 +4,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from models import User, Bot
-from flask_mail import Mail, Message
 import logging
 import hashlib
 from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password
@@ -159,8 +158,6 @@ def forgot_password():
 
     url = request.host_url + 'reset/l'
     user = User.query.filter_by(email=email).first()
-
-    msg = Message('Password Reset Link', sender='legendarystar2160187@gmail.com', recipients=[email])
 
     reset_url = f'http://localhost:3000/reset-password/{token}'
     data['password_reset_link'] = reset_url

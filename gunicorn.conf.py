@@ -1,5 +1,2 @@
-from gunicorn.config import Config
-
-class MyConfig(Config):
-    workers = 3
-    worker_class = 'sync'
+bind = "0.0.0.0:5000"
+workers = 4

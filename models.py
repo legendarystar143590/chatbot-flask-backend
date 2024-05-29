@@ -11,22 +11,22 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, nullable = False, autoincrement = True)
-    first_name = db.Column(db.String(), nullable = True)
-    last_name = db.Column(db.String(), nullable = False)
-    email = db.Column(db.String(), unique = True, nullable = False)
-    language = db.Column(db.String(), unique = False, nullable = False)
-    password = db.Column(db.String(), nullable=False)
-    mauticId = db.Column(db.String(), nullable=False)
-    botsActive = db.Column(db.String(), nullable=False, default = 0)
+    first_name = db.Column(db.String(255), nullable = True)
+    last_name = db.Column(db.String(255), nullable = False)
+    email = db.Column(db.String(255), unique = True, nullable = False)
+    language = db.Column(db.String(255), unique = False, nullable = False)
+    password = db.Column(db.String(255), nullable=False)
+    mauticId = db.Column(db.String(255), nullable=False)
+    botsActive = db.Column(db.String(255), nullable=False, default = 0)
     com_name = db.Column(db.Integer, nullable=False)
-    com_vat = db.Column(db.String(), nullable=False)
-    com_street = db.Column(db.String(), nullable=False)
-    com_street_number = db.Column(db.String(), nullable=False)
-    com_city = db.Column(db.String(), nullable=False)
-    com_postal = db.Column(db.String(), nullable=False)
-    com_country = db.Column(db.String(), nullable=False)
-    com_website = db.Column(db.String(), nullable=False)
-    role = db.Column(db.String(), nullable = False, default = 'user')
+    com_vat = db.Column(db.String(255), nullable=False)
+    com_street = db.Column(db.String(255), nullable=False)
+    com_street_number = db.Column(db.String(255), nullable=False)
+    com_city = db.Column(db.String(255), nullable=False)
+    com_postal = db.Column(db.String(255), nullable=False)
+    com_country = db.Column(db.String(255), nullable=False)
+    com_website = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(255), nullable = False, default = 'user')
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
     def __init__(self, first_name, last_name, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website):
@@ -46,6 +46,11 @@ class User(db.Model):
         self.com_country = com_country
         self.com_website = com_website
     
+    # Add an index to the id column
+    __table_args__ = (
+        db.Index('idx_user_id', 'id'),
+    )
+
     def register_user_if_not_exist(self):        
         db_user = User.query.filter(User.email == self.email).all()
         if not db_user:
@@ -109,13 +114,13 @@ class Bot(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    name = db.Column(db.String(), nullable=True)
-    avatar = db.Column(db.LargeBinary, nullable = True)
-    color = db.Column(db.String(), nullable=False)
+    name = db.Column(db.String(255), nullable=True)
+    avatar = db.Column(db.LargeBinary, nullable=True)
+    color = db.Column(db.String(255), nullable=False)
     active = db.Column(db.Integer, nullable=False)
-    start_time = db.Column(db.String(), nullable=False)
-    end_time = db.Column(db.String(), nullable=False)
-    knowledge_base = db.Column(db.String(), nullable=False)
+    start_time = db.Column(db.String(255), nullable=False)
+    end_time = db.Column(db.String(255), nullable=False)
+    knowledge_base = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, user_id, name, avatar, color, active, start_time, end_time, knowledge_base):
@@ -127,6 +132,11 @@ class Bot(db.Model):
         self.start_time = start_time
         self.end_time = end_time
         self.knowledge_base = knowledge_base
+
+    # Add an index to the name column
+    __table_args__ = (
+        db.Index('idx_bot_name', 'name'),
+    )
     
     def save(self):
         db.session.add(self)
@@ -146,7 +156,7 @@ class Bot(db.Model):
             'name': self.name,
             'avatar': self.avatar,
             'color': self.color,
-            'active': self.active==1,
+            'active': self.active == 1,
             'start_time': self.start_time,
             'end_time': self.end_time,
             'knowledge_base': self.knowledge_base,
@@ -160,9 +170,9 @@ class Document(db.Model):
     __tablename__ = 'documents'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    type = db.Column(db.String(), nullable=False)
-    filename = db.Column(db.String(), nullable=False)
-    unique_id = db.Column(db.String(), nullable=False)
+    type = db.Column(db.String(255), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    unique_id = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, type, filename, unique_id):
@@ -197,8 +207,8 @@ class Document(db.Model):
 class Website(db.Model):
     __tablename__ = 'websites'
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    url = db.Column(db.String(), nullable=True)
-    unique_id = db.Column(db.String(), nullable=False)
+    url = db.Column(db.String(255), nullable=True)
+    unique_id = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, url, unique_id):
@@ -232,9 +242,9 @@ class Text(db.Model):
     __tablename__ = 'texts'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    question = db.Column(db.String(), nullable=True)
-    answer = db.Column(db.String(), nullable=True)
-    unique_id = db.Column(db.String(), nullable=False)
+    question = db.Column(db.String(255), nullable=True)
+    answer = db.Column(db.String(255), nullable=True)
+    unique_id = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, question, answer, unique_id):
@@ -270,8 +280,8 @@ class KnowledgeBase(db.Model):
     __tablename__ = 'knowledgebases'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = db.Column(db.String(), nullable=False)
-    unique_id = db.Column(db.String(), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    unique_id = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -308,9 +318,9 @@ class Conversation(db.Model):
     __tablename__ = 'conversations'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    user_message = db.Column(db.String(), nullable=False)
-    response = db.Column(db.String(), nullable=False)
-    session_id = db.Column(db.String(), nullable=False)
+    user_message = db.Column(db.String(255), nullable=False)
+    response = db.Column(db.String(255), nullable=False)
+    session_id = db.Column(db.String(255), nullable=False)
     bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -368,12 +378,12 @@ class Order(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    sessoin_id = db.Column(db.String(), nullable=False)
-    email = db.Column(db.String(), nullable=False)
-    status = db.Column(db.String(), nullable=False)
-    content = db.Column(db.String(), nullable=False)
+    sessoin_id = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    status = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    bot_name = db.Column(db.String(), db.ForeignKey('bots.name'))
+    bot_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, sessoin_id, user_id, bot_name, email, status, content):
@@ -445,9 +455,9 @@ class ChatLog(db.Model):
     __tablename__ = 'chatlogs'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    session_id = db.Column(db.String(), nullable=False)
-    user_id = db.Column(db.String(), nullable=False)
-    bot_name = db.Column(db.Integer, db.ForeignKey('bots.name'))
+    session_id = db.Column(db.String(255), nullable=False)
+    user_id = db.Column(db.String(255), nullable=False)
+    bot_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     ended_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 

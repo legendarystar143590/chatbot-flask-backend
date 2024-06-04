@@ -5,7 +5,6 @@ from models import DocumentKnowledge, Website, Text, KnowledgeBase
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import TextLoader
-from langchain_community.document_loaders import Docx2txtLoader
 from utils.provider import generate_kb_from_document, generate_kb_from_url,  tiktoken_text_split, tiktoken_doc_split 
 from utils.scraper import scrape_url
 import uuid

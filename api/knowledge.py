@@ -8,7 +8,6 @@ from langchain_community.document_loaders import TextLoader
 from langchain_community.document_loaders import Docx2txtLoader
 from utils.provider import generate_kb_from_document, generate_kb_from_url,  tiktoken_text_split, tiktoken_doc_split 
 from utils.scraper import scrape_url
-from utils.common import extract_text_from_docx
 import uuid
 import os
 from werkzeug.utils import secure_filename

@@ -1,5 +1,4 @@
-from spire.doc import *
-from spire.doc.common import *
+
 
 def get_language_code(language_name):
     # Dictionary mapping full language names to ISO 639-1 codes
@@ -30,19 +29,3 @@ def get_language_name(language_code):
 
     # Return the full language name, defaulting to 'English' if the code is not found
     return codes_to_languages.get(language_code, 'English')
-
-def extract_text_from_docx(file_path):
-    # Create a Document object
-    document = Document()
-    # Load a Word document
-    document.LoadFromFile(file_path)
-
-    # Extract the text of the document
-    document_text = document.GetText()
-    print(document_text)
-    return document_text
-
-# def extract_text_from_doc(file_path):
-#     text = docx2txt.process(file_path)
-#     return text
-    

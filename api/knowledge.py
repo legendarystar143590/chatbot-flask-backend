@@ -1,11 +1,14 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import jwt_required
 from flask_cors import cross_origin
-from models import Document, Website, Text, KnowledgeBase
+from models import DocumentKnowledge, Website, Text, KnowledgeBase
 from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import Docx2txtLoader
 from utils.provider import generate_kb_from_document, generate_kb_from_url,  tiktoken_text_split, tiktoken_doc_split 
 from utils.scraper import scrape_url
+from utils.common import extract_text_from_docx
 import uuid
 import os
 from werkzeug.utils import secure_filename
@@ -60,10 +63,12 @@ def upload_document():
                 loader = PyMuPDFLoader(file_path)
             elif extension.lower() == ".txt":
                 loader = TextLoader(file_path, encoding='utf-8')
+            elif extension.lower() == ".docx" or extension.lower() == ".doc":
+                loader = Docx2txtLoader(file_path)
             data = loader.load()
 
             chunks = tiktoken_doc_split(data)
-            new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
+            new_doc = DocumentKnowledge(filename=filename, type=extension, unique_id=unique_id)
             new_doc.save()
             type_of_knowledge = 'pdf'
             generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
@@ -123,7 +128,7 @@ def get_knowledgebase():
         base = KnowledgeBase.query.filter_by(id=baseId).first()
         websites = Website.query.filter_by(unique_id=base.unique_id).all()
         websites_list = [website.json() for website in websites]
-        docs = Document.query.filter_by(unique_id=base.unique_id).all()
+        docs = DocumentKnowledge.query.filter_by(unique_id=base.unique_id).all()
         docs_list = [doc.json() for doc in docs]
         print(docs_list)
         texts = Text.query.filter_by(unique_id=base.unique_id).all()
@@ -198,7 +203,7 @@ def update_knowledge_base():
                 data = loader.load()
 
                 chunks = tiktoken_doc_split(data)
-                new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
+                new_doc = DocumentKnowledge(filename=filename, type=extension, unique_id=unique_id)
                 new_doc.save()
                 type_of_knowledge = 'pdf'
                 generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)

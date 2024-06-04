@@ -166,7 +166,7 @@ class Bot(db.Model):
     def __repr__(self):
         return f"<Bot {self.name}>"
 
-class Document(db.Model):
+class DocumentKnowledge(db.Model):
     __tablename__ = 'documents'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -186,11 +186,11 @@ class Document(db.Model):
 
     @staticmethod
     def get_by_id(id):
-        return Document.query.get(id)
+        return DocumentKnowledge.query.get(id)
     
     @staticmethod
     def get_all_documents():
-        return Document.query.all()
+        return DocumentKnowledge.query.all()
 
     def json(self):
         return {
@@ -202,7 +202,7 @@ class Document(db.Model):
         }
 
     def __repr__(self):
-        return f"<Document {self.name}>"
+        return f"<DocumentKnowledge {self.name}>"
 
 class Website(db.Model):
     __tablename__ = 'websites'

@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import requests
 import os
+load_dotenv()
 
 MAUTIC_BASE_URL = os.getenv('MAUTIC_BASE_URL')
 MAUTIC_CLIENT_ID = os.getenv('MAUTIC_CLIENT_ID')

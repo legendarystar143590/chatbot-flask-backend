@@ -17,75 +17,81 @@ knowledge_blueprint = Blueprint('lknowledge_blueprintueprint', __name__)
 @knowledge_blueprint.route('/upload_document', methods=['POST'])
 @jwt_required()
 def upload_document():
-    name = request.form['name']
-    files = request.files.getlist('files')
-    qas_json = request.form['qa']
-    urls_json = request.form['urls']
-    user_id = request.form["userID"]
-    if name is None or user_id is None:
-        return jsonify({"error":"Unauthorized request!"}), 405
-    print("name >>>", name)
-    print("files >>>", len(files))
-    print("qas >>>", qas_json)
-    print("website >>>", urls_json)
+    try:
+        name = request.form['name']
+        files = request.files.getlist('files')
+        qas_json = request.form['qa']
+        urls_json = request.form['urls']
+        user_id = request.form["userID"]
+        if name is None or user_id is None:
+            return jsonify({"error":"Unauthorized request!"}), 405
+        print("name >>>", name)
+        print("files >>>", len(files))
+        print("qas >>>", urls_json)
 
-    unique_id = str(uuid.uuid4())
-    new_knowledge = KnowledgeBase(name=name, unique_id=unique_id, user_id=user_id)
-    new_knowledge.save()
+        unique_id = str(uuid.uuid4())
+        new_knowledge = KnowledgeBase(name=name, unique_id=unique_id, user_id=user_id)
+        new_knowledge.save()
 
-    if urls_json:
-        urls = json.loads(urls_json)
-        for url in urls:
-            new_website = Website(url=url, unique_id=unique_id)
-            new_website.save()
-            # save_from_url(new_website.id, url)
-            print(new_website.id)
-            text = scrape_url(url)
-            chunks = tiktoken_text_split(text)
-            type_of_knowledge = 'url'
-            generate_kb_from_url(chunks, unique_id, new_website.id, type_of_knowledge)
+        if urls_json:
+            urls = json.loads(urls_json)
+            for url in urls:
+                print(url['url'])
+                new_website = Website(url=url["url"], unique_id=unique_id)
+                new_website.save()
+                # save_from_url(new_website.id, url)
+                print(new_website.id)
+                text = scrape_url(url["url"])
+                chunks = tiktoken_text_split(text)
+                type_of_knowledge = 'url'
+                print("website >>>", chunks)
 
-    for file in files:
-        # Process each file (e.g., saving or using it)
-        file.save('uploads/' + file.filename)
-        file_path = 'uploads/' + file.filename
-        filename = file.filename
-        extension = os.path.splitext(secure_filename(file.filename))[1]
-        loader = None
-        # print("extension is >>>>", extension)
-        if extension.lower() == ".pdf":
-            loader = PyMuPDFLoader(file_path)
-        elif extension.lower() == ".txt":
-            loader = TextLoader(file_path, encoding='utf-8')
-        data = loader.load()
+                generate_kb_from_url(chunks, unique_id, new_website.id, type_of_knowledge)
 
-        chunks = tiktoken_doc_split(data)
-        new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
-        new_doc.save()
-        type_of_knowledge = 'pdf'
-        generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
-        
-        # After processing is done, delete the file
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            print(f"Deleted file: {file_path}")
-        else:
-            print(f"The file does not exist: {file_path}")
-            print("Doc ID >>> ", new_doc.id)
+        for file in files:
+            # Process each file (e.g., saving or using it)
+            file.save('uploads/' + file.filename)
+            file_path = 'uploads/' + file.filename
+            filename = file.filename
+            extension = os.path.splitext(secure_filename(file.filename))[1]
+            loader = None
+            # print("extension is >>>>", extension)
+            if extension.lower() == ".pdf":
+                loader = PyMuPDFLoader(file_path)
+            elif extension.lower() == ".txt":
+                loader = TextLoader(file_path, encoding='utf-8')
+            data = loader.load()
 
-    if qas_json:
-        qas = json.loads(qas_json)
-        for qa in qas:
-            new_qa = Text(question=qa["question"], answer=qa["answer"], unique_id=unique_id)
-            new_qa.save()
-            text = f"Question: {qa['question']} Answer: {qa['answer']}"
-            chunks = tiktoken_text_split(text)
-            type_of_knowledge = 'qa'
-            generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
+            chunks = tiktoken_doc_split(data)
+            new_doc = Document(filename=filename, type=extension, unique_id=unique_id)
+            new_doc.save()
+            type_of_knowledge = 'pdf'
+            generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
+            
+            # After processing is done, delete the file
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            else:
+                print(f"The file does not exist: {file_path}")
+                print("Doc ID >>> ", new_doc.id)
 
-            print("QA ID>>>", new_qa.id)
+        if qas_json:
+            qas = json.loads(qas_json)
+            for qa in qas:
+                new_qa = Text(question=qa["question"], answer=qa["answer"], unique_id=unique_id)
+                new_qa.save()
+                text = f"Question: {qa['question']} Answer: {qa['answer']}"
+                chunks = tiktoken_text_split(text)
+                type_of_knowledge = 'qa'
+                generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
 
-    return {'status': 'success', 'message': f'Received {len(files)} files with name {name}'}
+                print("QA ID>>>", new_qa.id)
+
+        return {'status': 'success', 'message': f'Received {len(files)} files with name {name}'}
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error': 'Error saving database!'}), 500
 
 @knowledge_blueprint.route('/get_knowledge_bases',methods=['GET'])
 @jwt_required()

@@ -35,6 +35,10 @@ def create_bot():
             avatar.save(os.path.join('uploads/images', unique_filename))
             avatar_path = os.path.join('uploads/images', unique_filename)
             image_url = upload_image_to_spaces(avatar_path, "aiana", unique_filename)
+            # After processing is done, delete the file
+            if os.path.exists(avatar_path):
+                os.remove(avatar_path)
+                print(f"Deleted file: {avatar_path}")
         else:
             bin_image = None
         new_bot = Bot(user_id=user_id, name=name, avatar=unique_filename, color=color, active=active, start_time=start_time, end_time=end_time, knowledge_base=knowledge_base)

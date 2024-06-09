@@ -14,6 +14,7 @@ from api.chatlog import log_blueprint
 from api.tickets import ticket_blueprint
 from models import db, User
 from datetime import timedelta
+from utils.common import get_bucket_name
 load_dotenv()
 
 app = Flask(__name__)
@@ -55,6 +56,8 @@ app.register_blueprint(knowledge_blueprint, url_prefix='/api')
 app.register_blueprint(log_blueprint, url_prefix='/api')
 app.register_blueprint(ticket_blueprint, url_prefix='/api')
 
+
+get_bucket_name()
 @app.route("/")
 def index():
    db.create_all()

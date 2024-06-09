@@ -115,7 +115,7 @@ class Bot(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(255), nullable=True)
-    avatar = db.Column(db.LargeBinary, nullable=True)
+    avatar = db.Column(db.String(255), nullable=True)
     color = db.Column(db.String(255), nullable=False)
     active = db.Column(db.Integer, nullable=False)
     start_time = db.Column(db.String(255), nullable=False)

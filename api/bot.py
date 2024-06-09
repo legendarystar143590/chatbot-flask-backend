@@ -1,9 +1,10 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from werkzeug.utils import secure_filename
 from models import Bot, KnowledgeBase, Conversation, ChatLog, Order, User
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
+from utils.common import upload_image_to_spaces, get_url_from_name
 import uuid
 from datetime import datetime
 from io import BytesIO
@@ -28,14 +29,15 @@ def create_bot():
         end_time = data['end_time'] 
         knowledge_base = data['knowledge_base']
         print("Avatar >>>",avatar)
+        image_url = ""
         if avatar:
-            img_bytes = BytesIO()
-            avatar.save(img_bytes)
-            img_bytes.seek(0)
-            bin_image = img_bytes.read()
+            unique_filename = str(uuid.uuid4()) + '_' + avatar.filename
+            avatar.save(os.path.join('uploads/images', unique_filename))
+            avatar_path = os.path.join('uploads/images', unique_filename)
+            image_url = upload_image_to_spaces(avatar_path, "aiana", unique_filename)
         else:
             bin_image = None
-        new_bot = Bot(user_id=user_id, name=name, avatar=bin_image, color=color, active=active, start_time=start_time, end_time=end_time, knowledge_base=knowledge_base)
+        new_bot = Bot(user_id=user_id, name=name, avatar=unique_filename, color=color, active=active, start_time=start_time, end_time=end_time, knowledge_base=knowledge_base)
         print("Start time >>>",new_bot.start_time)
         new_bot.save()
         user = User.query.filter_by(id=user_id).first()
@@ -71,8 +73,8 @@ def get_chatbots():
         for bot in bots:
             bot_data = bot.json()  # Assuming that this method converts the bot instance to a dict
             if bot.avatar:  # Check if the bot has an avatar
-                avatar_encoded = base64.b64encode(bot.avatar).decode('utf-8')  # Encode the binary data to base64
-                bot_data['avatar'] = f"data:image/png;base64,{avatar_encoded}"  # Prepend the necessary prefix
+                avatarUrl = get_url_from_name(bot.avatar)
+                bot_data['avatar'] = avatarUrl
             else:
                 bot_data['avatar'] = None  # No avatar case
             bot_list.append(bot_data)
@@ -95,8 +97,8 @@ def get_chatbot():
         bot_data = bot.json()
         # print(bot_data)
         if bot.avatar:  # Check if the bot has an avatar
-            avatar_encoded = base64.b64encode(bot.avatar).decode('utf-8')  # Encode the binary data to base64
-            bot_data['avatar'] = f"data:image/png;base64,{avatar_encoded}"  # Prepend the necessary prefix
+            avatarUrl = get_url_from_name(bot.avatar)
+            bot_data['avatar'] = avatarUrl
         else:
             bot_data['avatar'] = None  # No avatar case
         if bot_data['knowledge_base'] != "-1":

@@ -145,11 +145,12 @@ def get_knowledgebase():
         # Handle exceptions properly too
         return jsonify({'error': str(e)}), 500
 
-@knowledge_blueprint.route('/update_knowledge_base/', methods=['POST'])
+@knowledge_blueprint.route('/update_knowledge_base', methods=['POST'])
 @jwt_required()
 def update_knowledge_base():
     try:
-        unique_id = request.args.get('unique_id')
+        unique_id = request.form.get('unique_id')
+
         # Retrieve the existing knowledge base entry using the provided unique_id
         knowledge_base_entry = KnowledgeBase.query.filter_by(unique_id=unique_id).first()
         if not knowledge_base_entry:

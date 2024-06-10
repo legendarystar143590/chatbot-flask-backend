@@ -63,6 +63,7 @@ def index():
    db.create_all()
    # db.drop_all()
    # del_all_records()
+   
    # print('Deleted')
    return "This is APIs for CustomGPT!"
 

@@ -4,14 +4,14 @@ from langchain.prompts import PromptTemplate
 
 def generate_kb_from_document(chunks, unique_id, doc_index, _type):
     try:
-        upsertDocToIndex("aiana-knowledge-base", unique_id, doc_index, chunks, _type)
+        upsertDocToIndex("knowledge-base", unique_id, doc_index, chunks, _type)
     except Exception as e:
         print("Generating the knoledgebase >>>" ,str(e))
         return - 1
 
 def generate_kb_from_url(chunks, unique_id, doc_index, _type):
     try:
-        upsertTextToIndex("aiana-knowledge-base", unique_id, doc_index, chunks, _type)
+        upsertTextToIndex("knowledge-base", unique_id, doc_index, chunks, _type)
     except Exception as e:
         print("Generating the knoledgebase >>>" ,str(e))
         return - 1

@@ -7,6 +7,7 @@ from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import TextLoader
 from utils.provider import generate_kb_from_document, generate_kb_from_url,  tiktoken_text_split, tiktoken_doc_split 
 from utils.scraper import scrape_url
+from utils.vectorizor import delDocument
 import uuid
 import os
 from werkzeug.utils import secure_filename
@@ -193,19 +194,23 @@ def update_knowledge_base():
                 filename = file.filename
                 extension = os.path.splitext(secure_filename(file.filename))[1]
                 loader = None
+                type_of_knowledge = ''
                 # print("extension is >>>>", extension)
                 if extension.lower() == ".pdf":
+                    type_of_knowledge = "pdf"
                     loader = PyMuPDFLoader(file_path)
                 elif extension.lower() == ".txt":
+                    type_of_knowledge = "txt"
                     loader = TextLoader(file_path, encoding='utf-8')
                 elif extension.lower() == ".docx":
+                    type_of_knowledge = "docx"
+                    print(type_of_knowledge)
                     loader = Docx2txtLoader(file_path)
                 data = loader.load()
 
                 chunks = tiktoken_doc_split(data)
                 new_doc = DocumentKnowledge(filename=filename, type=extension, unique_id=unique_id)
                 new_doc.save()
-                type_of_knowledge = 'pdf'
                 generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
                 
                 # After processing is done, delete the file
@@ -234,4 +239,13 @@ def update_knowledge_base():
         print("Error: ", str(e))
         return jsonify({'status':'error'}), 500
 
-        
+@knowledge_blueprint.route('/del_document', methods=['POST'])
+@jwt_required()       
+def del_document():
+    data = request.get_json()
+    doc_id = data["id"]
+    document = DocumentKnowledge.get_by_id(doc_id)
+    if delDocument(document.unique_id, document.id, document.type):
+        return jsonify({'status': 'success'}), 201
+    else:
+        return jsonify({'status':'error'}), 500

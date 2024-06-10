@@ -31,7 +31,7 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
 print(OPENAI_API_KEY)
 print(EMBEDDING_MODEL)
-print(PINECONE_INDEX_DIMENSION)
+print(PINECONE_INDEX_NAME)
 
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
@@ -61,7 +61,7 @@ def deleteIndex(index_name):
         if index_name in pc.list_indexes().names():
             pc.delete_index(index_name)
         else:
-            print("There is no such an index to delete")
+            print("There is no such an index to l")
     except Exception as e:
         print("Error in deleteIndex()", str(e))
         pass
@@ -114,6 +114,17 @@ def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
     except Exception as e:
         print("Error in upsertDataToIndex()", str(e))
         pass
+
+# Delete doc in the vector database
+def delDocument(collection_name, doc_index, _type):
+    index = pc.Index("knowledge-base")
+    filter_con = {"collection_name": collection_name, "doc_index": doc_index, "type":_type}
+    try:
+        index.delete(filter=filter_con)
+        return True
+    except Exception as e:
+        print(str(e))
+        return False
 
 #  Generate the response
 def get_answer(bot_id, session_id, query, knowledge_base):

@@ -30,6 +30,7 @@ def create_bot():
         knowledge_base = data['knowledge_base']
         print("Avatar >>>",avatar)
         image_url = ""
+        unique_filename = ''
         if avatar:
             unique_filename = str(uuid.uuid4()) + '_' + avatar.filename
             avatar.save(os.path.join('uploads/images', unique_filename))

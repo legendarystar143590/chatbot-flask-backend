@@ -57,19 +57,22 @@ def upload_document():
             filename = file.filename
             extension = os.path.splitext(secure_filename(file.filename))[1]
             loader = None
+            
+            type_of_knowledge = 'pdf'
             # print("extension is >>>>", extension)
             if extension.lower() == ".pdf":
                 loader = PyMuPDFLoader(file_path)
             elif extension.lower() == ".txt":
+                type_of_knowledge = 'txt'
                 loader = TextLoader(file_path, encoding='utf-8')
             elif extension.lower() == ".docx" or extension.lower() == ".doc":
+                type_of_knowledge = 'docx'
                 loader = Docx2txtLoader(file_path)
             data = loader.load()
 
             chunks = tiktoken_doc_split(data)
             new_doc = DocumentKnowledge(filename=filename, type=extension, unique_id=unique_id)
             new_doc.save()
-            type_of_knowledge = 'pdf'
             generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
             
             # After processing is done, delete the file

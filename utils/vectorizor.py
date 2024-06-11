@@ -147,7 +147,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
         
         docsearch = PineconeVectorStore.from_existing_index(
-                index_name='aiana-knowledge-base', embedding=embeddings)
+                index_name='knowledge-base', embedding=embeddings)
         docs = ""
         if knowledge_base !="-1":        
             condition = {"collection_name": knowledge_base}

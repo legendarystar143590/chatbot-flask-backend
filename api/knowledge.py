@@ -249,6 +249,7 @@ def del_document():
     doc_id = data["id"]
     document = DocumentKnowledge.get_by_id(doc_id)
     if delDocument(document.unique_id, document.id, document.type):
+        DocumentKnowledge.del_by_id(doc_id)
         return jsonify({'status': 'success'}), 201
     else:
         return jsonify({'status':'error'}), 500

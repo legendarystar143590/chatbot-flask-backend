@@ -185,9 +185,15 @@ class DocumentKnowledge(db.Model):
         db.session.commit()
 
     @staticmethod
-    def get_by_id(id):
-        return DocumentKnowledge.query.get(id)
-    
+    def get_by_id(_id):
+        return DocumentKnowledge.query.get(_id)
+
+    @staticmethod
+    def del_by_id(_id):
+        document = DocumentKnowledge.get_by_id(_id)
+        db.session.delete(document)
+        db.session.commit()
+        
     @staticmethod
     def get_all_documents():
         return DocumentKnowledge.query.all()
@@ -301,6 +307,15 @@ class KnowledgeBase(db.Model):
     @staticmethod
     def get_all_knowledgebases():
         return knowledgeBase.query.all()
+    @staticmethod
+    def delete_by_id(knowledgebase_id):
+        knowledgebase = KnowledgeBase.get_by_id(knowledgebase_id)
+        if knowledgebase:
+            db.session.delete(knowledgebase)
+            db.session.commit()
+            return True
+        return False
+
 
     def json(self):
         return {

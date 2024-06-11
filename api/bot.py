@@ -28,7 +28,7 @@ def create_bot():
         start_time = data['start_time'] 
         end_time = data['end_time'] 
         knowledge_base = data['knowledge_base']
-        print("Avatar >>>",avatar)
+        print("Avatar >>>", avatar)
         image_url = ""
         unique_filename = ''
         if avatar:
@@ -107,7 +107,9 @@ def get_chatbot():
         else:
             bot_data['avatar'] = None  # No avatar case
         if bot_data['knowledge_base'] != "-1":
+            print(bot_data['knowledge_base'])
             knowledge_base = KnowledgeBase.query.filter_by(unique_id=bot_data['knowledge_base']).first()
+            print(knowledge_base)
             bot_data['knowledge_base'] = knowledge_base.name
         return jsonify(bot_data), 200
 

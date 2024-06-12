@@ -7,7 +7,7 @@ from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import TextLoader
 from utils.provider import generate_kb_from_document, generate_kb_from_url,  tiktoken_text_split, tiktoken_doc_split 
 from utils.scraper import scrape_url
-from utils.vectorizor import delDocument
+from utils.vectorizor import delDocument, delKnowledgeBase
 import uuid
 import os
 from werkzeug.utils import secure_filename
@@ -262,6 +262,18 @@ def del_website():
     website = Website.get_by_id(website_id)
     if delDocument(website.unique_id, website.id, "url"):
         Website.del_by_id(website_id)
+        return jsonify({'status': 'success'}), 201
+    else:
+        return jsonify({'status': 'error'}), 500
+        
+@knowledge_blueprint.route('/del_knowledgebase', methods=['POST'])
+@jwt_required()       
+def del_knowledgebase():
+    data = request.get_json()
+    id = data["baseId"]
+    kb = KnowledgeBase.get_by_id(id)
+    if delKnowledgeBase(kb.unique_id):
+        KnowledgeBase.delete_by_id(id)
         return jsonify({'status': 'success'}), 201
     else:
         return jsonify({'status':'error'}), 500

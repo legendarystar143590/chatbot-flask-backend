@@ -30,10 +30,6 @@ PINECONE_INDEX_DIMENSION = int(os.getenv("PINECONE_INDEX_DIMENSION", "3072"))
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
-print(OPENAI_API_KEY)
-print(EMBEDDING_MODEL)
-print(PINECONE_INDEX_NAME)
-
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
 # Create a new index with name
@@ -130,7 +126,19 @@ def delDocument(collection_name, doc_index, _type):
         print(str(e))
         return False
 
-# Delete website knowledge base in the pinecone
+# Delete knowledge base in the vector database
+def delKnowledgeBase(collection_name):
+    index = pc.Index("knowledge-base")
+    # filter_con = {"collection_name": collection_name, "doc_index": str(doc_index), "type":_type}
+    filter_con = { "collection_name": collection_name}
+    try:
+        print(filter_con)
+        index.delete(filter=filter_con)
+        return True
+    except Exception as e:
+        print(str(e))
+        return False
+
 
 #  Generate the response
 def get_answer(bot_id, session_id, query, knowledge_base):

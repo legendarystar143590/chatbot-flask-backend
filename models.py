@@ -230,6 +230,12 @@ class Website(db.Model):
         return Website.query.get(id)
     
     @staticmethod
+    def del_by_id(_id):
+        website = Website.get_by_id(_id)
+        db.session.delete(website)
+        db.session.commit()
+
+    @staticmethod
     def get_all_websites():
         return Website.query.all()
 

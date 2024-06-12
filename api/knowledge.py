@@ -248,8 +248,20 @@ def del_document():
     data = request.get_json()
     doc_id = data["id"]
     document = DocumentKnowledge.get_by_id(doc_id)
-    if delDocument(document.unique_id, document.id, document.type):
+    if delDocument(document.unique_id, document.id, document.type[1:]):
         DocumentKnowledge.del_by_id(doc_id)
+        return jsonify({'status': 'success'}), 201
+    else:
+        return jsonify({'status':'error'}), 500
+
+@knowledge_blueprint.route('/del_url', methods=['POST'])
+@jwt_required()       
+def del_website():
+    data = request.get_json()
+    website_id = data["id"]
+    website = Website.get_by_id(website_id)
+    if delDocument(website.unique_id, website.id, "url"):
+        Website.del_by_id(website_id)
         return jsonify({'status': 'success'}), 201
     else:
         return jsonify({'status':'error'}), 500

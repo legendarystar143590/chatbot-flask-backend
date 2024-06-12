@@ -99,12 +99,13 @@ def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
         
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
         vectors = []
-
+        count = 0
         for chunk in chunks:
+            count = count + 1
             metadata = {"collection_name": collection_name, "doc_index": doc_index, "type":_type, "text": chunk}
             
             s_vector = {}
-            # s_vector['id'] = str(doc_index)
+            s_vector['id'] = str(doc_index+count)
             s_vector['values'] = embeddings.embed_query(chunk)
             s_vector['metadata'] = metadata
 
@@ -119,13 +120,17 @@ def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
 # Delete doc in the vector database
 def delDocument(collection_name, doc_index, _type):
     index = pc.Index("knowledge-base")
-    filter_con = {"collection_name": collection_name, "doc_index": doc_index, "type":_type}
+    # filter_con = {"collection_name": collection_name, "doc_index": str(doc_index), "type":_type}
+    filter_con = { "collection_name": collection_name, "doc_index": doc_index, "type":_type}
     try:
+        print(filter_con)
         index.delete(filter=filter_con)
         return True
     except Exception as e:
         print(str(e))
         return False
+
+# Delete website knowledge base in the pinecone
 
 #  Generate the response
 def get_answer(bot_id, session_id, query, knowledge_base):

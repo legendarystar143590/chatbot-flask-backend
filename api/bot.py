@@ -178,6 +178,7 @@ def query():
             bot = Bot.query.filter_by(id=bot_id).first()
         knowledge_base = bot.knowledge_base
         result = generate(bot_id, session_id, query, knowledge_base)
+        print("Respond >>>>", result)
         solve = True
         if "If so, leave me your email" in result:
             solve = False

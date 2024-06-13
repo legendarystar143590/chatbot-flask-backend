@@ -144,18 +144,20 @@ def delKnowledgeBase(collection_name):
 def get_answer(bot_id, session_id, query, knowledge_base):
     try:
         bot = Bot.get_by_id(bot_id)
-        starter = "This is my name. So if user asks my name, please provide my name:" + bot.name + " something like My name is XXX. I am happy to help you today. \n Answer based on the {context}"
-        template = """Only reply to non-technical questions such as about bot name and ability. If the question is about yourself like age or gender and etc. For the technical question, find the anaswer only based on the input context.  If there is no relevant info in the {context}, please say 'Sorry, I can't help with that. Do you want to book a ticket? If so leave me your email'
+        starter = f"""
+        You are a virtual assitant named {bot.name}. Remeber your name and answer if I ask your name, please use {bot.name}. You should only generate a detailed response based on the whole given document. If the"""
+        template = """If there is no relevant information in the document for the query, please say "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email"
         """
-        end = """ Context: {context}
+        end = """
+        Context:{context}
         Chat history: {chat_history}
         Human: {human_input}
-        Your Response as Chatbot: """
+        A: """
         
         template +=starter + end
         
         prompt = PromptTemplate(
-            input_variables=["chat_history", "human_input", "context"],
+            input_variables=["chat_history", "human_input"],
             template=template
         )
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
@@ -168,8 +170,8 @@ def get_answer(bot_id, session_id, query, knowledge_base):
             condition = {"collection_name": knowledge_base}
             # print(condition)
 
-            docs = docsearch.similarity_search(query, k=2, filter=condition)
-            # print("Got here  >>>", docs)
+            docs = docsearch.similarity_search(query, k=8, filter=condition)
+            print("Got here  >>>", docs)
 
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")

@@ -121,6 +121,26 @@ def get_chatbot():
         print("Error:", str(e))
         return jsonify({'error': 'Server error.'}), 400
 
+@bot_blueprint.route('/del_bot', methods=['POST'])
+@jwt_required()
+def del_bot():
+    try:
+        data = request.get_json()
+        bot_id = data["botId"]
+        if not bot_id:
+            return jsonify({'error': 'bot_id is required'}), 400
+
+        Bot.del_by_id(bot_id)
+        return jsonify({'message':'success'}), 201
+
+    except ValueError:
+        # If the provided user_id cannot be converted to an integer, return an error
+        return jsonify({'error': 'Invalid bot_id format. It should be an integer.'}), 400
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({'error': 'Server error.'}), 400
+
 @bot_blueprint.route('/update_chatbot', methods=['POST'])
 @jwt_required()
 def update_chatbot():

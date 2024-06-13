@@ -145,7 +145,17 @@ class Bot(db.Model):
     @staticmethod
     def get_by_id(bot_id):
         return Bot.query.filter_by(id=bot_id).first()
-    
+
+    @staticmethod
+    def del_by_id(_id):
+        bot = Bot.get_by_id(_id)
+        conversations = Conversation.query.filter_by(bot_id=_id).all()
+        for conversation in conversations:
+            db.session.delete(conversation)
+            db.session.commit()
+        db.session.delete(bot)
+        db.session.commit()
+
     @staticmethod
     def get_all_bots():
         return Bot.query.all()

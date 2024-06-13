@@ -153,6 +153,11 @@ class Bot(db.Model):
         for conversation in conversations:
             db.session.delete(conversation)
             db.session.commit()
+        
+        chatLogs = ChatLog.query.filter_by(bot_name=bot.name).all()
+        for log in chatLogs:
+            db.session.delete(log)
+            db.session.commit()
         db.session.delete(bot)
         db.session.commit()
 
@@ -367,7 +372,7 @@ class Conversation(db.Model):
 
     @staticmethod
     def get_by_id(id):
-        return Conversation.query.get(id).first()
+        return Conversation.query.get(id)
 
     @staticmethod
     def get_latest_by_session(id):
@@ -505,7 +510,7 @@ class ChatLog(db.Model):
 
     @staticmethod
     def get_by_id(id):
-        return ChatLog.query.get(id).first()
+        return ChatLog.query.get(id)
 
     @staticmethod
     def get_by_session(id):

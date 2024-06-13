@@ -6,6 +6,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from models import User, Bot
 import logging
 import hashlib
+import datetime
 from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password
 from utils.common import get_language_code
 
@@ -42,7 +43,7 @@ def login():
             # if login_mautic(mautic_data, user.mauticId) == 'error':
             #     return jsonify({'error': 'Server is busy. Try again later!'}), 400
                 
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             refresh_token = create_refresh_token(identity=user.id)
             return jsonify({'accessToken': access_token, 'refreshToken':refresh_token, 'userId':user.id}), 200
             # set_access_cookies(response, token)
@@ -195,5 +196,5 @@ def reset_with_token():
 @jwt_required(refresh=True)
 def refresh():
     current_user = get_jwt_identity()
-    new_access_token = create_access_token(identity=current_user)
+    new_access_token = create_access_token(identity=current_user, expires_delta=datetime.timedelta(hours=1))
     return jsonify(access_token=new_access_token), 201

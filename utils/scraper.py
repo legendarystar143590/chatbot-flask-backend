@@ -13,10 +13,12 @@ def scrape_url(url):
         # Extract the relevant text content from the HTML
         text = soup.get_text()
         # Preprocess the text content as needed
+
         processed_text = preprocess_text(text)
-        # print(processed_text)
+        print(processed_text)
         return processed_text
-    except :
+    except Exception as e:
+        print(str(e))
         return False
 
 # Define a function to preprocess the extracted text content

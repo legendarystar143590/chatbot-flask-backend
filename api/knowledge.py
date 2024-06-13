@@ -34,16 +34,21 @@ def upload_document():
         unique_id = str(uuid.uuid4())
         new_knowledge = KnowledgeBase(name=name, unique_id=unique_id, user_id=user_id)
         new_knowledge.save()
+        bad_urls =[]
 
         if urls_json:
             urls = json.loads(urls_json)
             for url in urls:
                 print(url['url'])
+                text = scrape_url(url["url"])
+                if (text == False):
+                    bad_urls.append(url["url"])
+                    continue
                 new_website = Website(url=url["url"], unique_id=unique_id)
                 new_website.save()
                 # save_from_url(new_website.id, url)
                 print(new_website.id)
-                text = scrape_url(url["url"])
+                
                 chunks = tiktoken_text_split(text)
                 type_of_knowledge = 'url'
                 print("website >>>", chunks)
@@ -94,8 +99,8 @@ def upload_document():
                 generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
 
                 print("QA ID>>>", new_qa.id)
-
-        return {'status': 'success', 'message': f'Received {len(files)} files with name {name}'}
+        url_res = len(bad_urls)==0
+        return {'status': 'success', 'message': f'Received {len(files)} files with name {name}', 'bad_url':url_res}
     except Exception as e:
         print(str(e))
         return jsonify({'error': 'Error saving database!'}), 500

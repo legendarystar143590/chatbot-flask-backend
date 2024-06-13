@@ -32,8 +32,7 @@ def upload_document():
         print("qas >>>", urls_json)
 
         unique_id = str(uuid.uuid4())
-        new_knowledge = KnowledgeBase(name=name, unique_id=unique_id, user_id=user_id)
-        new_knowledge.save()
+        
         bad_urls =[]
 
         if urls_json:
@@ -99,6 +98,8 @@ def upload_document():
                 generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
 
                 print("QA ID>>>", new_qa.id)
+        new_knowledge = KnowledgeBase(name=name, unique_id=unique_id, user_id=user_id)
+        new_knowledge.save()
         url_res = len(bad_urls)==0
         return {'status': 'success', 'message': f'Received {len(files)} files with name {name}', 'bad_url':url_res}
     except Exception as e:

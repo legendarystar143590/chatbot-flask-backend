@@ -159,23 +159,23 @@ def get_answer(bot_id, session_id, query, knowledge_base):
             template=template
         )
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
-        print(embeddings)
+        # print(embeddings)
         docsearch = PineconeVectorStore.from_existing_index(
                 index_name='knowledge-base', embedding=embeddings)
         docs = ""
-        print(docsearch)
+        # print(docsearch)
         if knowledge_base !="-1":        
             condition = {"collection_name": knowledge_base}
-            print(condition)
+            # print(condition)
 
             docs = docsearch.similarity_search(query, k=2, filter=condition)
-            print("Got here  >>>", docs)
+            # print("Got here  >>>", docs)
 
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
         stuff_chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt, memory=memory)
         latest_chat_history = Conversation.get_latest_by_session(session_id)
-        print(docs)
+        # print(docs)
         reduce_chat_history = ""
         for index, record in enumerate(latest_chat_history):
             if index < 4:

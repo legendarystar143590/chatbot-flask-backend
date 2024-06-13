@@ -39,8 +39,8 @@ def login():
             mautic_data["language"] = user.language
             mautic_data["bots_active"] = active_bots
             mautic_data["bots_registered"] = total_bots
-            if login_mautic(mautic_data, user.mauticId) == 'error':
-                return jsonify({'error': 'Server is busy. Try again later!'}), 400
+            # if login_mautic(mautic_data, user.mauticId) == 'error':
+            #     return jsonify({'error': 'Server is busy. Try again later!'}), 400
                 
             access_token = create_access_token(identity=user.id)
             refresh_token = create_refresh_token(identity=user.id)

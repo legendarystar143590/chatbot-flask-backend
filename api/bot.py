@@ -141,15 +141,16 @@ def update_chatbot():
         start_time = data['start_time'] 
         end_time = data['end_time'] 
         knowledge_base = data['knowledge_base']
+        unique_filename = ''
         if avatar:
-            img_bytes = BytesIO()
-            avatar.save(img_bytes)
-            img_bytes.seek(0)
-            bin_image = img_bytes.read()
+            unique_filename = str(uuid.uuid4()) + '_' + avatar.filename
+            avatar.save(os.path.join('uploads/images', unique_filename))
+            avatar_path = os.path.join('uploads/images', unique_filename)
+            image_url = upload_image_to_spaces(avatar_path, "aiana", unique_filename)
         else:
             bin_image = None
         bot.name = name
-        bot.avatar = bin_image
+        bot.avatar = unique_filename
         bot.color = color
         bot.active = active
         bot.start_time = start_time
@@ -178,7 +179,7 @@ def query():
         knowledge_base = bot.knowledge_base
         result = generate(bot_id, session_id, query, knowledge_base)
         solve = True
-        if "If so leave me your email" in result:
+        if "If so, leave me your email" in result:
             solve = False
         chat_log = ChatLog.get_by_session(session_id)
         if chat_log:

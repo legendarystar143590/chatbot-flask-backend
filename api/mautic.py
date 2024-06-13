@@ -38,6 +38,7 @@ def create_mautic_user(data):
         create_user_url = f'{MAUTIC_BASE_URL}/api/contacts/new'
         print(create_user_url)
 
+
         access_token = get_access_token()
         # print("Token", access_token)
         # Headers including the access token
@@ -55,6 +56,7 @@ def create_mautic_user(data):
         if response.status_code == 201:
             print("User created successfully")
             response_data = response.json()
+            print(response_data)
             contact_id = response_data['contact']['id']
             # Checking response
             print("Here is contact id", contact_id)
@@ -173,10 +175,10 @@ def get_access_token():
     if response.status_code == 200:
         # If the response is successful, parse it as JSON
         response_data = response.json()  # This converts the JSON response to a Python dictionary
-        print("Response Data:", response_data)
+        # print("Response Data:", response_data)
         # Example of accessing specific data in the response
         access_token = response_data.get('access_token')  # Assuming the token is returned in 'access_token'
-        print("Access Token:", access_token)
+        # print("Access Token:", access_token)
         return access_token
     else:
         # If the response was not successful, print the status code and response text
@@ -277,7 +279,7 @@ def book_ticket(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.put(book_ticket_url, headers=headers, data = payloads)
+        response = requests.put(book_ticket_url, data=payloads, headers=headers)
         
         print(response.status_code)
         if response.status_code == 200:
@@ -286,6 +288,7 @@ def book_ticket(data, mauticId):
             # Checking response
             return response_data['success']
         else:
+            print(response.status_code)
             return 'error'
         
     except Exception as e:

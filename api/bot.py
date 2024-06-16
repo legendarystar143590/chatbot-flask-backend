@@ -176,6 +176,9 @@ def update_chatbot():
             avatar.save(os.path.join('uploads/images', unique_filename))
             avatar_path = os.path.join('uploads/images', unique_filename)
             image_url = upload_image_to_spaces(avatar_path, "aiana", unique_filename)
+             if os.path.exists(avatar_path):
+                os.remove(avatar_path)
+                print(f"Deleted file: {avatar_path}")
         else:
             unique_filename = bot.avatar
         bot.name = name

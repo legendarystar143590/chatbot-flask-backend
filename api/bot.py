@@ -167,13 +167,17 @@ def update_chatbot():
         end_time = data['end_time'] 
         knowledge_base = data['knowledge_base']
         unique_filename = ''
+        print(bot.avatar)
         if avatar:
-            unique_filename = str(uuid.uuid4()) + '_' + avatar.filename
+            if bot.avatar:
+                unique_filename = bot.avatar
+            else:
+                unique_filename = str(uuid.uuid4()) + '_' + avatar.filename
             avatar.save(os.path.join('uploads/images', unique_filename))
             avatar_path = os.path.join('uploads/images', unique_filename)
             image_url = upload_image_to_spaces(avatar_path, "aiana", unique_filename)
         else:
-            bin_image = None
+            unique_filename = bot.avatar
         bot.name = name
         bot.avatar = unique_filename
         bot.color = color

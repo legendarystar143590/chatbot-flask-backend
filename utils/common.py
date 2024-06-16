@@ -29,7 +29,7 @@ def get_bucket_name():
 def upload_image_to_spaces(image_path, bucket_name, object_name):
     try:
         client.upload_file(image_path, bucket_name, object_name)
-        print(f"Image uploaded successfully to DigitalOcean Spaces.", url)
+        # print(f"Image uploaded successfully to DigitalOcean Spaces.", url)
         image_url = f"https://{bucket_name}.ams3.digitaloceanspaces.com/{object_name}"
         return image_url
     except Exception as e:

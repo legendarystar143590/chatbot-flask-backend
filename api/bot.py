@@ -89,16 +89,16 @@ def get_chatbots():
         # If the provided user_id cannot be converted to an integer, return an error
         return jsonify({'error': 'Invalid user_id format. It should be an integer.'}), 400
 
-@bot_blueprint.route('/get_chatbot', methods=['GET'])
+@bot_blueprint.route('/get_chatbot_data', methods=['GET'])
 @jwt_required()
-def get_chatbot():
+def get_chatbot_data():
     try:
         bot_id = request.args.get('botId')
+        user_id = request.args.get('userId')
         if not bot_id:
             return jsonify({'error': 'bot_id is required'}), 400
 
         bot = Bot.get_by_id(bot_id)
-        print(bot.start_time)
         bot_data = bot.json()
         # print(bot_data)
         if bot.avatar:  # Check if the bot has an avatar
@@ -111,7 +111,12 @@ def get_chatbot():
             knowledge_base = KnowledgeBase.query.filter_by(unique_id=bot_data['knowledge_base']).first()
             print(knowledge_base)
             bot_data['knowledge_base'] = knowledge_base.name
-        return jsonify(bot_data), 200
+        if not user_id:
+            return jsonify({'error': 'user_id is required'}), 400
+
+        bases = KnowledgeBase.query.filter_by(user_id=user_id).all()
+        knowledge_bases_list = [base.json() for base in bases]
+        return jsonify({'bot_data':bot_data, 'knowledge':knowledge_bases_list}), 200
 
     except ValueError:
         # If the provided user_id cannot be converted to an integer, return an error

@@ -358,7 +358,7 @@ class Conversation(db.Model):
     response = db.Column(db.String(255), nullable=False)
     session_id = db.Column(db.String(255), nullable=False)
     bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
 
     def __init__(self, user_message, response, bot_id, session_id):
         self.user_message = user_message
@@ -404,7 +404,7 @@ class Conversation(db.Model):
             'response': self.response,
             'session_id':self.session_id,
             'bot_id': self.bot_id,
-            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+            'created_at': self.created_at  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
         }
 
     def __repr__(self):
@@ -494,8 +494,8 @@ class ChatLog(db.Model):
     session_id = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.String(255), nullable=False)
     bot_name = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    ended_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
+    ended_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
 
     def __init__(self, user_id,  bot_name, session_id, created_at, ended_at):
         self.created_at = created_at
@@ -541,8 +541,8 @@ class ChatLog(db.Model):
             'bot_name': self.bot_name,
             'user_id': self.user_id,
             'session_id': self.session_id,
-            'created_at': self.created_at.isoformat(),  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
-            'ended_at': self.ended_at.isoformat()
+            'created_at': self.created_at,  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+            'ended_at': self.ended_at
         }
 
     def __repr__(self):

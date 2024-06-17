@@ -176,7 +176,7 @@ def update_chatbot():
             avatar.save(os.path.join('uploads/images', unique_filename))
             avatar_path = os.path.join('uploads/images', unique_filename)
             image_url = upload_image_to_spaces(avatar_path, "aiana", unique_filename)
-             if os.path.exists(avatar_path):
+            if os.path.exists(avatar_path):
                 os.remove(avatar_path)
                 print(f"Deleted file: {avatar_path}")
         else:
@@ -204,13 +204,12 @@ def query():
         bot_id = data['botId']
         user_id = data['userId']
         session_id = data['sessionId']
-        currentDateAndTime = data['createdAt']
-        created_at = datetime.fromisoformat(currentDateAndTime)
+        created_at = data['createdAt']
+        print("Respond >>>>", created_at)
         if bot_id:
             bot = Bot.query.filter_by(id=bot_id).first()
         knowledge_base = bot.knowledge_base
         result = generate(bot_id, session_id, query, knowledge_base)
-        print("Respond >>>>", result)
         solve = True
         if "If so, leave me your email" in result:
             solve = False

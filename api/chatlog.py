@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
-from models import Bot, KnowledgeBase, Conversation, ChatLog, Order
+from models import Bot, KnowledgeBase, Conversation, ChatLog, Order, Bot
+from utils.common import get_url_from_name
 from flask_jwt_extended import jwt_required
 from utils.provider import generate
 from datetime import datetime
@@ -15,6 +16,7 @@ def get_chat():
         logLists = []
         for log in chatLog:
             log_json = log.json()
+            
             # start_time = datetime.fromisoformat(log_json["created_at"])
             # end_time = datetime.fromisoformat(log_json["ended_at"])
              
@@ -39,18 +41,18 @@ def get_log_data():
         session_id = data['session']
         chatLog = ChatLog.get_by_session(session_id)
         conversations = Conversation.get_by_session(session_id)
+        imageUrl = ''
 
         convLists = []
         for log in conversations:
             log_json = log.json()
-            # start_time = datetime.fromisoformat(log_json["created_at"])
-            
-            # # Convert to user-friendly format
-            # user_friendly_starttime = start_time.strftime('%Y-%m-%d %I:%M:%S %p')
-            # log_json["created_at"] = user_friendly_starttime
+
+            bot = Bot.get_by_id(log.bot_id)
+            if bot.avatar and imageUrl == '':
+                imageUrl = get_url_from_name(bot.avatar)
             convLists.append(log_json)
-        
-        return jsonify({'log':chatLog.json(), 'conversation':convLists}), 200
+        # print(convLists)
+        return jsonify({'log':chatLog.json(), 'conversation':convLists, 'bot_avatar':imageUrl}), 200
     
     except Exception as e:
         print(str(e))

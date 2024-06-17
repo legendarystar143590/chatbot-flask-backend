@@ -178,7 +178,7 @@ def update_knowledge_base():
         if name:
             knowledge_base_entry.name = name
             knowledge_base_entry.save()
-
+        bad_urls = []
         # Process URLs JSON if provided
         if urls_json:
             urls = json.loads(urls_json)
@@ -186,11 +186,15 @@ def update_knowledge_base():
                 # print(url['id'])
                 if len(urls) > 0 and url['id'] != -1:
                     continue
+                
                 new_website = Website(url=url['url'], unique_id=unique_id)
                 new_website.save()
                 # save_from_url(new_website.id, url)
                 print(new_website.id)
                 text = scrape_url(url['url'])
+                if (text == False):
+                    bad_urls.append(url["url"])
+                    continue
                 chunks = tiktoken_text_split(text)
                 type_of_knowledge = 'url'
                 generate_kb_from_url(chunks, unique_id, new_website.id, type_of_knowledge)
@@ -242,8 +246,9 @@ def update_knowledge_base():
                     chunks = tiktoken_text_split(text)
                     type_of_knowledge = 'qa'
                     generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
-
-        return jsonify({'status': 'success', 'message': f'Updated knowledge base entry with unique_id {unique_id}'})
+        url_res = len(bad_urls) == 0
+        
+        return jsonify({'status': 'success', 'message': f'Updated knowledge base entry with unique_id {unique_id}', 'bad_url':url_res})
     except Exception as e:
         print("Error: ", str(e))
         return jsonify({'status':'error'}), 500

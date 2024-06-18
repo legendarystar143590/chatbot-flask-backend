@@ -52,8 +52,20 @@ def create_bot():
         total_bots = Bot.query.filter_by(user_id=user.id).count()
         active_bots = Bot.query.filter_by(user_id=user.id, active=1).count()
         mauticData["language"] = user.language
+        mauticData["aiana_status"]= "active"
         mauticData["bots_active"] = active_bots
         mauticData["bots_registered"] = total_bots
+        mauticData["first_name"]= user.first_name
+        mauticData["last_name"]= user.last_name
+        mauticData["email"]= user.email
+        mauticData["com_name"]= user.com_name
+        mauticData["com_vat"]= user.com_vat
+        mauticData["com_street"]= user.com_street
+        mauticData["com_street_number"]=user.com_street_number
+        mauticData["com_postal"]=user.com_postal
+        mauticData["com_city"]=user.com_city
+        mauticData["com_country"]=user.com_country  
+        mauticData["com_website"]=user.com_website
         if login_mautic(mauticData, user.mauticId) == 'error':
             return jsonify({'error': 'Server is busy. Try again later!'}), 400
 

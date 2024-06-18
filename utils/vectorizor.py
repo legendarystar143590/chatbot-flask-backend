@@ -185,6 +185,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         reduce_chat_history = ""
         for index, record in enumerate(latest_chat_history):
             if index < 4:
+                print(record.response)
                 stuff_chain.memory.save_context({'human_input': record.user_message}, {'output': record.response})
                 reduce_chat_history += f"Human: {record.user_message}\nBot: {record.response}\n"
                 # reduce_chain.memory.save_context({'human_input': record.user_message}, {'output': record.response})

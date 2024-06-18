@@ -97,20 +97,23 @@ def get_chatbot_data():
         user_id = request.args.get('userId')
         if not bot_id:
             return jsonify({'error': 'bot_id is required'}), 400
-
-        bot = Bot.get_by_id(bot_id)
-        bot_data = bot.json()
-        # print(bot_data)
-        if bot.avatar:  # Check if the bot has an avatar
-            avatarUrl = get_url_from_name(bot.avatar)
-            bot_data['avatar'] = avatarUrl
+        bot_data = {}
+        if bot_id != '-1':
+            bot = Bot.get_by_id(bot_id)
+            bot_data = bot.json()
+            # print(bot_data)
+            if bot.avatar:  # Check if the bot has an avatar
+                avatarUrl = get_url_from_name(bot.avatar)
+                bot_data['avatar'] = avatarUrl
+            else:
+                bot_data['avatar'] = None  # No avatar case
+            if bot_data['knowledge_base'] != "-1":
+                print(bot_data['knowledge_base'])
+                knowledge_base = KnowledgeBase.query.filter_by(unique_id=bot_data['knowledge_base']).first()
+                print(knowledge_base)
+                bot_data['knowledge_base'] = knowledge_base.name
         else:
-            bot_data['avatar'] = None  # No avatar case
-        if bot_data['knowledge_base'] != "-1":
-            print(bot_data['knowledge_base'])
-            knowledge_base = KnowledgeBase.query.filter_by(unique_id=bot_data['knowledge_base']).first()
-            print(knowledge_base)
-            bot_data['knowledge_base'] = knowledge_base.name
+            bot_data = '-1'
         if not user_id:
             return jsonify({'error': 'user_id is required'}), 400
 

@@ -40,8 +40,20 @@ def login():
             mautic_data["language"] = user.language
             mautic_data["bots_active"] = active_bots
             mautic_data["bots_registered"] = total_bots
-            # if login_mautic(mautic_data, user.mauticId) == 'error':
-            #     return jsonify({'error': 'Server is busy. Try again later!'}), 400
+            mautic_data["aiana_status"]= "active",
+            mautic_data["first_name"]= user.first_name,
+            mautic_data["last_name"]= user.last_name,
+            mautic_data["email"]= user.email,
+            mautic_data["com_name"]= user.com_name,
+            mautic_data["com_vat"]= user.com_vat,
+            mautic_data["com_street"]= user.com_street,
+            mautic_data["com_street_number"]=user.com_street_number,
+            mautic_data["com_postal"]=user.com_postal,
+            mautic_data["com_city"]=user.com_city,
+            mautic_data["com_country"]=user.com_country,
+            mautic_data["com_website"]=user.com_website,
+            if login_mautic(mautic_data, user.mauticId) == 'error':
+                return jsonify({'error': 'Server is busy. Try again later!'}), 400
                 
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             refresh_token = create_refresh_token(identity=user.id)

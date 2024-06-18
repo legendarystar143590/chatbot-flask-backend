@@ -98,7 +98,7 @@ def get_chatbot_data():
         if not bot_id:
             return jsonify({'error': 'bot_id is required'}), 400
         bot_data = {}
-        if bot_id != '-1':
+        if bot_id != '-1' and bot_id!='undefined':
             bot = Bot.get_by_id(bot_id)
             bot_data = bot.json()
             # print(bot_data)

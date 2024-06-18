@@ -109,7 +109,7 @@ def update_mautic_user(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.put(update_user_url, data=payload, headers=headers)
+        response = requests.post(update_user_url, data=payload, headers=headers)
         
         print(response.status_code)
         print(response.json())
@@ -195,6 +195,21 @@ def login_mautic(data, mauticId):
             "aiana_status": "active",
             "bots_active": data["bots_active"],
             "bots_registered": data["bots_registered"],
+            "firstname": data["first_name"],
+            "lastname": data["last_name"],
+            "email": data["email"],
+            "company_name": data["com_name"],
+            "company_vat": data["com_vat"],
+            "company_street": data["com_street"],
+            "company_street_number": data["com_street_number"],
+            "company_postal_code": data["com_postal"],
+            "company_city": data["com_city"],
+            "company_country": data["com_country"],
+            "company_website_url": data["com_website"],
+            "aiana_status": "registered",
+            "aiana_environment": "TEST",
+            "license": "FREE",
+            "person_source":"APPLICATION",
         }
 
         update_user_url = f'{MAUTIC_BASE_URL}/api/contacts/{mauticId}/edit'
@@ -243,7 +258,7 @@ def mautic_reset_password(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.put(update_user_url, data=payload, headers=headers)
+        response = requests.post(update_user_url, data=payload, headers=headers)
         
         print(response.status_code)
         if response.status_code == 200:

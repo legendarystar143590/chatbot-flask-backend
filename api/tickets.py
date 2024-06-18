@@ -28,6 +28,7 @@ def book():
         data['id'] = order.id
         data['link'] = 'https://login.aiana.io/tickets'
         data['created'] = order.created_at
+        
         if book_ticket(data, user.mauticId) != 'error':
             return jsonify({'message': 'success'}), 201
         else:

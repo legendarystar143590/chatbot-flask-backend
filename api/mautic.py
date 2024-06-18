@@ -294,7 +294,7 @@ def book_ticket(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.put(book_ticket_url, data=payloads, headers=headers)
+        response = requests.post(book_ticket_url, data=payloads, headers=headers)
         
         print(response.status_code)
         if response.status_code == 200:

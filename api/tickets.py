@@ -14,12 +14,12 @@ def book():
         
         data = request.get_json()
         bot_id = data['botId']
-        userIndex = data['userId']
+        userIndex = data['userIndex']
         session_id = data['sessionId']
         email = data['email']
         content = data['content']
         user = User.get_by_index(userIndex)
-        order = Order(session_id,user.id, userIndex, bot_id, email, "open", content)
+        order = Order(session_id, user.id, userIndex, bot_id, email, "open", content)
         order.save()
         chat_log = ChatLog.get_by_session(session_id)
         chat_log.result = 'Email-Sent'

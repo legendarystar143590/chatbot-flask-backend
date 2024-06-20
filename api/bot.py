@@ -166,9 +166,11 @@ def del_bot():
 def get_embeddings():
     try:
         botIndex = request.args.get('botIndex')
+        userIndex = request.args.get('userIndex')
         print(botIndex)
         bot_data = {}
-        if botIndex!='undefined':
+        
+        if botIndex!=None:
             bot = Bot.get_by_index(botIndex)
             bot_data = bot.json()
             # print(bot_data)
@@ -177,6 +179,9 @@ def get_embeddings():
                 bot_data['avatar'] = avatarUrl
             else:
                 bot_data['avatar'] = ''  # No avatar case
+        if userIndex != None:
+            user = User.get_by_index(userIndex)
+            bot_data['user_id'] = user.id 
         return jsonify({'bot': bot_data}), 200
     except Exception as e:
         print(str(e))

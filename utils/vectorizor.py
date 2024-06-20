@@ -145,12 +145,13 @@ def get_answer(bot_id, session_id, query, knowledge_base):
     try:
         bot = Bot.get_by_id(bot_id)
         starter = f"""
-        There are rules you must follow to reply based on the user's query. 
-        1. First determine if user's query is technical query or any other things like about yourself and your ability.
-        2. If user's query is about technical things that wants you to provide technial answer, summarize the context and provide relevant information based on the context. 
-            Here if there is no relevant info in the context for the query, please say "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email.
-        3. If user'query is not technical problem, don't use the context info and reply in general way based on the general info about you. 
-           Here is general info about you: You are helpful assistant named {bot.name}.  Act politely and always use oral and phrasal verbs. Always think about the meaning of the user's query and follow the rules. """
+        There are rules you must follow to reply based on the user's query:
+        1. First determine if the user's query is a technical query or any other type of query like about yourself and your ability.
+        2. If the user's query is about technical things that require a technical answer, summarize the context and provide relevant information if it exists in the context. If there is no relevant info in the context for the query, please say "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email."
+        3. If the user's query is not a technical problem, don't use the context info and reply in a general way based on the general info about you. Here is general info about you: You are a helpful assistant named {bot.name}. Act politely and always use oral and phrasal verbs. Always think about the meaning of the user's query and follow the rules.
+        4. Always check the context before determining your response and adhere to these rules strictly.
+        5. Your name is {bot.name}
+        """
         template = """"""
         end = """
         Context:{context}

@@ -258,6 +258,8 @@ def update_knowledge_base():
 def del_document():
     data = request.get_json()
     doc_id = data["id"]
+    if not doc_id:
+        return jsonify({'status': 'error'}), 500
     document = DocumentKnowledge.get_by_id(doc_id)
     if delDocument(document.unique_id, document.id, document.type[1:]):
         DocumentKnowledge.del_by_id(doc_id)

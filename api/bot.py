@@ -31,8 +31,9 @@ def create_bot():
         print("Avatar >>>", avatar)
         image_url = ""
         unique_filename = ''
+        index = str(uuid.uuid4())
         if avatar:
-            unique_filename = str(uuid.uuid4()) + '_' + avatar.filename
+            unique_filename = index + '_' + avatar.filename
             avatar.save(os.path.join('uploads/images', unique_filename))
             avatar_path = os.path.join('uploads/images', unique_filename)
             image_url = upload_image_to_spaces(avatar_path, "aiana", unique_filename)
@@ -42,7 +43,7 @@ def create_bot():
                 print(f"Deleted file: {avatar_path}")
         else:
             bin_image = None
-        new_bot = Bot(user_id=user_id, name=name, avatar=unique_filename, color=color, active=active, start_time=start_time, end_time=end_time, knowledge_base=knowledge_base)
+        new_bot = Bot(user_id=user_id, name=name, index=index,  avatar=unique_filename, color=color, active=active, start_time=start_time, end_time=end_time, knowledge_base=knowledge_base)
         print("Start time >>>",new_bot.start_time)
         new_bot.save()
         user = User.query.filter_by(id=user_id).first()
@@ -161,6 +162,26 @@ def del_bot():
         print("Error:", str(e))
         return jsonify({'error': 'Server error.'}), 400
 
+@bot_blueprint.route('/get_embedding', methods=['GET'])
+def get_embeddings():
+    try:
+        botIndex = request.args.get('botIndex')
+        print(botIndex)
+        bot_data = {}
+        if botIndex!='undefined':
+            bot = Bot.get_by_index(botIndex)
+            bot_data = bot.json()
+            # print(bot_data)
+            if bot.avatar:  # Check if the bot has an avatar
+                avatarUrl = get_url_from_name(bot.avatar)
+                bot_data['avatar'] = avatarUrl
+            else:
+                bot_data['avatar'] = ''  # No avatar case
+        return jsonify({'bot': bot_data}), 200
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error':'Server Error'}), 500
+
 @bot_blueprint.route('/update_chatbot', methods=['POST'])
 @jwt_required()
 def update_chatbot():
@@ -209,9 +230,8 @@ def update_chatbot():
     except Exception as e:
         print("Error:", str(e))
         return jsonify({"error": "Server error"}), 500
-        
+    
 @bot_blueprint.route('/query', methods=['POST'])
-@jwt_required()
 def query():
     try:
         data = request.get_json()

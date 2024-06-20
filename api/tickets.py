@@ -9,22 +9,22 @@ ticket_blueprint = Blueprint('ticket_blueprint', __name__)
 
 
 @ticket_blueprint.route('/book', methods=['POST'])
-@jwt_required()
 def book():
     try:
         
         data = request.get_json()
         bot_id = data['botId']
-        user_id = data['userId']
+        userIndex = data['userId']
         session_id = data['sessionId']
         email = data['email']
-        content = data['content']  
-        order = Order(session_id, user_id, bot_id, email, "open", content)
+        content = data['content']
+        user = User.get_by_index(userIndex)
+        order = Order(session_id,user.id, userIndex, bot_id, email, "open", content)
         order.save()
         chat_log = ChatLog.get_by_session(session_id)
         chat_log.result = 'Email-Sent'
         chat_log.save()
-        user = User.get_by_userID(user_id)
+        
         data['id'] = order.id
         data['link'] = 'https://login.aiana.io/tickets'
         data['created'] = order.created_at

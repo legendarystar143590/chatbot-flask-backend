@@ -10,7 +10,8 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True, nullable = False, autoincrement = True)
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    index = db.Column(db.String(255), nullable = False)
     first_name = db.Column(db.String(255), nullable = True)
     last_name = db.Column(db.String(255), nullable = False)
     email = db.Column(db.String(255), unique = True, nullable = False)
@@ -29,10 +30,11 @@ class User(db.Model):
     role = db.Column(db.String(255), nullable = False, default = 'user')
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
-    def __init__(self, first_name, last_name, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website):
+    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
+        self.index = index
         self.password = password
         self.mauticId = mauticId
         self.botsActive = botsActive
@@ -61,9 +63,15 @@ class User(db.Model):
 
     def save(self):
         db.session.commit()
-    
+
+    @staticmethod
     def get_by_userID(name):        
         db_user = User.query.filter_by(id=name).first()
+        return db_user
+
+    @staticmethod
+    def get_by_index(index):        
+        db_user = User.query.filter_by(index=index).first()
         return db_user
     
     @staticmethod
@@ -91,6 +99,7 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
+            'index': self.index,
             'mauticId': self.mauticId,
             'botsActive': self.botsActive,
             'language': get_language_name(self.language),
@@ -113,6 +122,7 @@ class Bot(db.Model):
     __tablename__ = 'bots'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    index = db.Column(db.String(255), nullable = False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(255), nullable=True)
     avatar = db.Column(db.String(255), nullable=True)
@@ -123,9 +133,10 @@ class Bot(db.Model):
     knowledge_base = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, user_id, name, avatar, color, active, start_time, end_time, knowledge_base):
+    def __init__(self, user_id, index, name, avatar, color, active, start_time, end_time, knowledge_base):
         self.user_id = user_id
         self.name = name
+        self.index = index
         self.avatar = avatar
         self.color = color
         self.active = active
@@ -145,6 +156,10 @@ class Bot(db.Model):
     @staticmethod
     def get_by_id(bot_id):
         return Bot.query.filter_by(id=bot_id).first()
+
+    @staticmethod
+    def get_by_index(botIndex):
+        return Bot.query.filter_by(index=botIndex).first()
 
     @staticmethod
     def del_by_id(_id):
@@ -175,6 +190,7 @@ class Bot(db.Model):
             'start_time': self.start_time,
             'end_time': self.end_time,
             'knowledge_base': self.knowledge_base,
+            'index':self.index,
             'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
         }
 
@@ -418,14 +434,16 @@ class Order(db.Model):
     email = db.Column(db.String(255), nullable=False)
     status = db.Column(db.String(255), nullable=False)
     content = db.Column(db.String(255), nullable=False)
+    user_index = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     bot_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, sessoin_id, user_id, bot_name, email, status, content):
+    def __init__(self, sessoin_id, user_id, user_index, bot_name, email, status, content):
         self.sessoin_id = sessoin_id
         self.bot_name = bot_name
         self.user_id = user_id
+        self.user_index = user_index
         self.email = email
         self.status = status
         self.content = content
@@ -437,6 +455,8 @@ class Order(db.Model):
     @staticmethod
     def get_by_id(id):
         return Order.query.filter_by(id=id).first()
+    
+
 
     @staticmethod
     def get_by_user(id):
@@ -478,6 +498,7 @@ class Order(db.Model):
             'sessoin_id': self.sessoin_id,
             'email': self.email,
             'user_id': self.user_id,
+            'user_index': self.user_index,
             'bot_name': self.bot_name,
             'status': self.status,
             'content': self.content,

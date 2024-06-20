@@ -95,7 +95,8 @@ def register():
         com_website = data['com_website']
         data['language'] = language
         index = str(uuid.uuid4())
-
+        if User.check_user_exist(email):
+            return jsonify({'error': 'User already exists'}), 409
         mauticId = create_mautic_user(data)
         if mauticId == 'error':
             return jsonify({'error': 'Invalid email!'}), 400

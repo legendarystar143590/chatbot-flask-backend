@@ -36,7 +36,7 @@ def create_mautic_user(data):
         }
 
         create_user_url = f'{MAUTIC_BASE_URL}/api/contacts/new'
-        print(create_user_url)
+        # print(create_user_url)
 
 
         access_token = get_access_token()

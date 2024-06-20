@@ -60,7 +60,12 @@ class User(db.Model):
             db.session.commit()
             return True
         return False
-
+    def check_user_exist(email):
+        db_user = User.query.filter(User.email==email).first()
+        if db_user is None:
+            return False
+        else:
+            return True
     def save(self):
         db.session.commit()
 

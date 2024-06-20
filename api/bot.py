@@ -119,7 +119,7 @@ def get_chatbot_data():
                 avatarUrl = get_url_from_name(bot.avatar)
                 bot_data['avatar'] = avatarUrl
             else:
-                bot_data['avatar'] = None  # No avatar case
+                bot_data['avatar'] = ""  # No avatar case
             if bot_data['knowledge_base'] != "-1":
                 print(bot_data['knowledge_base'])
                 knowledge_base = KnowledgeBase.query.filter_by(unique_id=bot_data['knowledge_base']).first()
@@ -178,7 +178,7 @@ def get_embeddings():
                 avatarUrl = get_url_from_name(bot.avatar)
                 bot_data['avatar'] = avatarUrl
             else:
-                bot_data['avatar'] = ''  # No avatar case
+                bot_data['avatar'] = ""  # No avatar case
         if userIndex != None:
             user = User.get_by_index(userIndex)
             bot_data['user_id'] = user.id 

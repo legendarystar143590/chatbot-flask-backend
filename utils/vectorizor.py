@@ -12,7 +12,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains.question_answering import load_qa_chain
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import RetrievalQA
-
+from langdetect import detect
 from pinecone import Pinecone, ServerlessSpec
 # from langchain.sql_database import SQLDatabase
 from models import Conversation, Bot
@@ -139,10 +139,16 @@ def delKnowledgeBase(collection_name):
         print(str(e))
         return False
 
+def detect_language(text):
+    try:
+        return detect(text)
+    except:
+        return 'en'  # default to English if detection fails
 
 #  Generate the response
 def get_answer(bot_id, session_id, query, knowledge_base):
     try:
+        language = detect_language(query)
         bot = Bot.get_by_id(bot_id)
         starter = f"""
         There are rules you must follow to reply based on the user's query:
@@ -151,6 +157,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         3. If the user's query is not a technical problem, don't use the context info and reply in a general way based on the general info about you. Here is general info about you: You are a helpful assistant named {bot.name}. Act politely and always use oral and phrasal verbs. Always think about the meaning of the user's query and follow the rules.
         4. Always check the context before determining your response and adhere to these rules strictly.
         5. Your name is {bot.name}
+        6. Reply in the same language with user's query and user's language of which ISO 639-1 code is '{language}'
         """
         template = """"""
         end = """
@@ -158,8 +165,8 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         Chat history: {chat_history}
         Human: {human_input}
         A: """
-        
-        template +=starter + end
+        template =starter + end
+        print(template)
         
         prompt = PromptTemplate(
             input_variables=["chat_history", "human_input"],
@@ -176,7 +183,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
             # print(condition)
 
             docs = docsearch.similarity_search(query, k=8, filter=condition)
-            print("Got here  >>>", docs)
+            # print("Got here  >>>", docs)
 
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
@@ -186,7 +193,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         reduce_chat_history = ""
         for index, record in enumerate(latest_chat_history):
             if index < 4:
-                print(record.response)
+                # print(record.response)
                 stuff_chain.memory.save_context({'human_input': record.user_message}, {'output': record.response})
                 reduce_chat_history += f"Human: {record.user_message}\nBot: {record.response}\n"
                 # reduce_chain.memory.save_context({'human_input': record.user_message}, {'output': record.response})

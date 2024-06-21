@@ -276,11 +276,11 @@ def mautic_reset_password(data, mauticId):
 def book_ticket(data, mauticId):
     try:
         payloads = {
-            # "tokens": {
+            "tokens": {
                 "ticket_url":data['link'],
                 "ticket_number": data['id'],
                 "created_at": data['created'],
-                # }
+                }
         }
         print(payloads)
         book_ticket_url = f'{MAUTIC_BASE_URL}/api/emails/3/contact/{mauticId}/send'

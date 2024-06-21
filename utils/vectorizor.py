@@ -150,13 +150,13 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         language = detect_language(query)
         bot = Bot.get_by_id(bot_id)
         starter = f"""
-        There are rules you must follow to reply based on the user's query:
+        Q: There are rules you must follow to reply based on the user's query:
         1. First determine if the user's query is a technical query or any other type of query like about yourself and your ability.
         2. If the user's query is about technical things that require a technical answer, summarize the context and provide relevant information if it exists in the context. If there is no relevant info in the context for the query, please say "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email."
         3. If the user's query is not a technical problem, don't use the context info and reply in a general way based on the general info about you. Here is general info about you: You are a helpful assistant named {bot.name}. Act politely and always use oral and phrasal verbs. Always think about the meaning of the user's query and follow the rules.
         4. Always check the context before determining your response and adhere to these rules strictly.
         5. Your name is {bot.name}
-        6. Reply in the same language with user's query and user's language of which ISO 639-1 code is '{language}'
+        6. Reply in the same language with user's query and ISO 639-1 code of user's language is '{language}'
         """
         template = """"""
         end = """

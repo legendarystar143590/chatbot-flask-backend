@@ -57,7 +57,7 @@ def login():
             if login_mautic(mautic_data, user.mauticId) == 'error':
                 return jsonify({'error': 'Server is busy. Try again later!'}), 400
                 
-            access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=0.5))
+            access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
             return jsonify({'accessToken': access_token, 'refreshToken':refresh_token, 'userId':user.id, 'userIndex':user.index}), 200
             # set_access_cookies(response, token)

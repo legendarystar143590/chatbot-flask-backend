@@ -92,7 +92,6 @@ def upsertDocToIndex(index_name, collection_name, doc_index, chunks, _type):
 # Upsert Text into index with 
 def upsertTextToIndex(index_name, collection_name, doc_index, chunks, _type):
     try:
-        
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
         vectors = []
         count = 0

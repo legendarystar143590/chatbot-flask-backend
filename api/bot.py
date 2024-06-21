@@ -94,7 +94,7 @@ def get_chatbots():
                 avatarUrl = get_url_from_name(bot.avatar)
                 bot_data['avatar'] = avatarUrl
             else:
-                bot_data['avatar'] = None  # No avatar case
+                bot_data['avatar'] = ""  # No avatar case
             bot_list.append(bot_data)
 
         return jsonify(bot_list), 200

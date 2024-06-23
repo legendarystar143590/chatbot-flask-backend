@@ -60,12 +60,18 @@ class User(db.Model):
             db.session.commit()
             return True
         return False
+    
+    @staticmethod
+    def get_all_users():
+        return User.query.order_by(User.role).all()
+
     def check_user_exist(email):
         db_user = User.query.filter(User.email==email).first()
         if db_user is None:
             return False
         else:
             return True
+    
     def save(self):
         db.session.commit()
 
@@ -117,7 +123,8 @@ class User(db.Model):
             'com_postal': self.com_postal,
             'com_country': self.com_country,
             'com_website': self.com_website,
-            'role': self.role
+            'role': self.role,
+            'created_at':self.created_at
         }
 
     def __repr__(self):

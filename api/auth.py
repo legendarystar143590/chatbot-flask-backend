@@ -58,8 +58,8 @@ def login():
                 return jsonify({'error': 'Server is busy. Try again later!'}), 400
                 
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
-            refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
-            return jsonify({'accessToken': access_token, 'refreshToken':refresh_token, 'userId':user.id, 'userIndex':user.index}), 200
+            # refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
+            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'role':user.role}), 200
             # set_access_cookies(response, token)
         else:
             print("Password verification failed.")  # Additional debug information
@@ -131,6 +131,28 @@ def get_user():
         return user.json(), 200
     else:
         return jsonify({'error': 'Not found user!'}), 400
+
+@user_blueprint.route('/get_users', methods=['POST'])
+@jwt_required()
+def get_users():
+    try:
+        data = request.get_json()
+        userId = data['userId']
+        user = User.get_by_userID(userId)
+        if user.role == 'user':
+            return jsonify({'message': 'No access!'}), 403
+        
+        users = User.get_all_users()
+        user_list = []
+        for user in users:
+            user_data = user.json()
+            user_list.append(user_data)
+
+        return jsonify(user_list), 200
+    except Exception as e:
+        print('Error in get_users()', str(e))
+        return jsonify({'messsage':'Server Error!'}), 500
+        
 
 @user_blueprint.route('update_user', methods=['POST'])
 @cross_origin()

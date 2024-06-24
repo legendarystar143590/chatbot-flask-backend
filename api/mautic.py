@@ -284,10 +284,10 @@ def book_ticket(data, mauticId):
             "tokens": {
                 "ticket_url":data['link'],
                 "ticket_number": data['id'],
-                "created_at": data['created'],
+                "created_at": str(data['created']),
                 }
         }
-        print(payloads)
+        payload_string = json.dumps(payloads)
         book_ticket_url = f'{MAUTIC_BASE_URL}/api/emails/3/contact/{mauticId}/send'
         print(book_ticket_url)
 
@@ -300,7 +300,7 @@ def book_ticket(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.post(book_ticket_url, data=payloads, headers=headers)
+        response = requests.post(book_ticket_url, data=payload_string, headers=headers)
         
         print(response.status_code)
         if response.status_code == 200:

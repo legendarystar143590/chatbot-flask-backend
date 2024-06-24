@@ -131,6 +131,17 @@ def get_user():
         return user.json(), 200
     else:
         return jsonify({'error': 'Not found user!'}), 400
+@user_blueprint.route('get_user_as_admin', methods=['POST'])
+@cross_origin()
+@jwt_required()
+def get_user_as_admin():
+    data = request.get_json()
+    userIndex = data['user']
+    user = User.get_by_index(userIndex)
+    if user:
+        return user.json(), 200
+    else:
+        return jsonify({'error': 'Not found user!'}), 400
 
 @user_blueprint.route('/get_users', methods=['POST'])
 @jwt_required()
@@ -165,7 +176,7 @@ def update_user():
         user.last_name = data['last_name']
         user.email = data['email']
         user.language = get_language_code(data['language'])
-        user.password = generate_password_hash(data['password'])
+        # user.password = generate_password_hash(data['password'])
         user.com_name = data['com_name']
         user.com_vat = data['com_vat']
         user.com_street = data['com_street']

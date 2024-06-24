@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import requests
 import os
+import json
 load_dotenv()
 
 MAUTIC_BASE_URL = os.getenv('MAUTIC_BASE_URL')
@@ -242,10 +243,13 @@ def login_mautic(data, mauticId):
 
 def mautic_reset_password(data, mauticId):
     try:
-        payload =  {
-            "password_reset_link": data["password_reset_link"],
+        link = data["password_reset_link"]
+        payload = {
+            "tokens": {
+                "{password_reset_link}": link
+            }
         }
-
+        payload_string = json.dumps(payload)
         update_user_url = f'{MAUTIC_BASE_URL}/api/emails/2/contact/{mauticId}/send'
         print(update_user_url)
 
@@ -255,10 +259,11 @@ def mautic_reset_password(data, mauticId):
         headers = {
             'Authorization': f'Bearer {access_token}',
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
         }
 
         # Sending the POST request
-        response = requests.post(update_user_url, data=payload, headers=headers)
+        response = requests.post(update_user_url, data=payload_string, headers=headers)
         
         print(response.status_code)
         if response.status_code == 200:

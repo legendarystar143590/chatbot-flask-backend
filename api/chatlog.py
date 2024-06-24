@@ -3,7 +3,7 @@ from models import Bot, KnowledgeBase, Conversation, ChatLog, Order, Bot
 from utils.common import get_url_from_name
 from flask_jwt_extended import jwt_required
 from utils.provider import generate
-from datetime import datetime
+import datetime
 log_blueprint = Blueprint('log_blueprint', __name__)
 
 @log_blueprint.route('/get_chat', methods=['POST'])
@@ -14,6 +14,7 @@ def get_chat():
         user_id = data['userID']
         chatLog = ChatLog.get_by_user(user_id)
         logLists = []
+        
         for log in chatLog:
             log_json = log.json()
             
@@ -42,6 +43,7 @@ def get_log_data():
         chatLog = ChatLog.get_by_session(session_id)
         conversations = Conversation.get_by_session(session_id)
         imageUrl = ''
+
 
         convLists = []
         for log in conversations:

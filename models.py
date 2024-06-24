@@ -135,7 +135,7 @@ class Bot(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     index = db.Column(db.String(255), nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String(255), nullable=True)
     avatar = db.Column(db.String(255), nullable=True)
     color = db.Column(db.String(255), nullable=False)
@@ -176,15 +176,15 @@ class Bot(db.Model):
     @staticmethod
     def del_by_id(_id):
         bot = Bot.get_by_id(_id)
-        conversations = Conversation.query.filter_by(bot_id=_id).all()
-        for conversation in conversations:
-            db.session.delete(conversation)
-            db.session.commit()
+        # conversations = Conversation.query.filter_by(bot_id=_id).all()
+        # for conversation in conversations:
+        #     db.session.delete(conversation)
+        #     db.session.commit()
         
-        chatLogs = ChatLog.query.filter_by(bot_name=bot.name).all()
-        for log in chatLogs:
-            db.session.delete(log)
-            db.session.commit()
+        # chatLogs = ChatLog.query.filter_by(bot_name=bot.name).all()
+        # for log in chatLogs:
+        #     db.session.delete(log)
+        #     db.session.commit()
         db.session.delete(bot)
         db.session.commit()
 
@@ -385,7 +385,7 @@ class Conversation(db.Model):
     user_message = db.Column(db.String(255), nullable=False)
     response = db.Column(db.String(255), nullable=False)
     session_id = db.Column(db.String(255), nullable=False)
-    bot_id = db.Column(db.Integer, db.ForeignKey('bots.id'))
+    bot_id = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
 
     def __init__(self, user_message, response, bot_id, session_id):

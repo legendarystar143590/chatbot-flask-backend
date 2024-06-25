@@ -444,6 +444,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     sessoin_id = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False)
+    website = db.Column(db.String(255), nullable=False, default='https://login.aiana.io')
     status = db.Column(db.String(255), nullable=False)
     content = db.Column(db.String(255), nullable=False)
     user_index = db.Column(db.String(255), nullable=False)
@@ -451,11 +452,12 @@ class Order(db.Model):
     bot_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, sessoin_id, user_id, user_index, bot_name, email, status, content):
+    def __init__(self, sessoin_id, user_id, website, user_index, bot_name, email, status, content):
         self.sessoin_id = sessoin_id
         self.bot_name = bot_name
         self.user_id = user_id
         self.user_index = user_index
+        self.website = website
         self.email = email
         self.status = status
         self.content = content
@@ -512,6 +514,7 @@ class Order(db.Model):
             'user_id': self.user_id,
             'user_index': self.user_index,
             'bot_name': self.bot_name,
+            'website': self.website,
             'status': self.status,
             'content': self.content,
             'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format

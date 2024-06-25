@@ -18,8 +18,10 @@ def book():
         session_id = data['sessionId']
         email = data['email']
         content = data['content']
+        website = data['website']
         user = User.get_by_index(userIndex)
-        order = Order(session_id, user.id, userIndex, bot_id, email, "open", content)
+        print("here is website >>> ", website)
+        order = Order(sessoin_id=session_id, user_id=user.id, website=website, user_index=userIndex, bot_name=bot_id, email=email, status="open", content=content)
         order.save()
         chat_log = ChatLog.get_by_session(session_id)
         chat_log.result = 'Email-Sent'

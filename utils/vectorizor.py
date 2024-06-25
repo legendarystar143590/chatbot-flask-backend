@@ -145,18 +145,19 @@ def detect_language(text):
         return 'en'  # default to English if detection fails
 
 #  Generate the response
-def get_answer(bot_id, session_id, query, knowledge_base):
+def get_answer(bot_id, session_id, query, knowledge_base, lang):
     try:
-        language = detect_language(query)
         bot = Bot.get_by_id(bot_id)
         starter = f"""
-        Q: There are rules you must follow to reply based on the user's query:
-        1. First determine if the user's query is a technical query or any other type of query like about yourself and your ability.
-        2. If the user's query is about technical things that require a technical answer, summarize the context and provide relevant information if it exists in the context. If there is no relevant info in the context for the query, please say "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email."
-        3. If the user's query is not a technical problem, don't use the context info and reply in a general way based on the general info about you. Here is general info about you: You are a helpful assistant named {bot.name}. Act politely and always use oral and phrasal verbs. Always think about the meaning of the user's query and follow the rules.
-        4. Always check the context before determining your response and adhere to these rules strictly.
-        5. Your name is {bot.name}
-        6. Reply in the same language with user's query and ISO 639-1 code of user's language is '{language}'
+        Q: Please follow these guidelines when responding:
+        - Reply in {lang}.
+        - Determine if the user's query is technical or general (e.g., about yourself or your abilities).
+        - If the query is technical and requires a detailed answer, summarize the context and provide relevant information if available.
+        - If the context lacks relevant information, Convert "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email." into {lang} and reply with that.
+        - For non-technical queries, do not use context information. Respond based on general information about yourself. Here is some general information: You are a helpful assistant named {bot.name}. Always respond politely and use conversational language. Consider the meaning of the user's query and follow these guidelines.
+        - Check the context before responding and adhere strictly to these guidelines.
+        - Your name is {bot.name}. Remember this throughout the conversation, and if asked, state your name.
+        
         """
         template = """"""
         end = """
@@ -181,7 +182,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
             condition = {"collection_name": knowledge_base}
             # print(condition)
 
-            docs = docsearch.similarity_search(query, k=8, filter=condition)
+            docs = docsearch.similarity_search(query, k=3, filter=condition)
             # print("Got here  >>>", docs)
 
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)

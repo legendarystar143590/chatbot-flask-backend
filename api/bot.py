@@ -262,7 +262,7 @@ def query():
         knowledge_base = bot.knowledge_base
         result = generate(bot_id, session_id, query, knowledge_base, lang)
         solve = True
-        if "If so, leave me your email" in result or "votre adresse e-mail" in result or "correo electrónico" in result or "Si oui, laissez-moi votre" in result:
+        if "If so, leave me your email" in result or "votre adresse e-mail" in result or "correo electrónico" in result or "laissez-moi votre" in result or "laat me dan je e-mailadres achter" in result:
             solve = False
         chat_log = ChatLog.get_by_session(session_id)
         if chat_log:

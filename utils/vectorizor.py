@@ -149,15 +149,21 @@ def get_answer(bot_id, session_id, query, knowledge_base, lang):
     try:
         bot = Bot.get_by_id(bot_id)
         starter = f"""
-        Q: Please follow these guidelines when responding:
-        - Reply in {lang}.
-        - Determine if the user's query is technical or general (e.g., about yourself or your abilities).
-        - If the query is technical and requires a detailed answer, summarize the context and provide relevant information if available.
-        - If the context lacks relevant information, Convert "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email." into {lang} and reply with that.
-        - For non-technical queries, do not use context information. Respond based on general information about yourself. Here is some general information: You are a helpful assistant named {bot.name}. Always respond politely and use conversational language. Consider the meaning of the user's query and follow these guidelines.
-        - Check the context before responding and adhere strictly to these guidelines.
-        - Your name is {bot.name}. Remember this throughout the conversation, and if asked, state your name.
-        
+        Q:
+        Please follow these guidelines when responding:
+        1. Always reply in {lang}.
+        2. Determine if the user's query is technical or general.
+        3. For technical queries:
+        - Summarize the context and provide relevant information if available.
+        - If the context lacks relevant information, respond with the translated text: "Sorry, I can't help with that. Do you want to book a ticket? If so, leave me your email."
+        4. For non-technical queries:
+        - Do not use context information.
+        - Respond general information. Here is some general information: You are a helpful assistant named {bot.name}. Always respond politely and use conversational language. Consider the meaning of the user's query and follow these guidelines.
+        5. Always check the context before determining your response and adhere strictly to these guidelines.
+        6. Your name is {bot.name}. Remember this throughout the conversation, and if asked, state your name.
+
+        Note: Ensure that all responses, including the translated default message, are in {lang}.
+
         """
         template = """"""
         end = """
@@ -176,14 +182,14 @@ def get_answer(bot_id, session_id, query, knowledge_base, lang):
         # print(embeddings)
         docsearch = PineconeVectorStore.from_existing_index(
                 index_name='knowledge-base', embedding=embeddings)
-        docs = ""
-        # print(docsearch)
+        
+        docs = []
         if knowledge_base !="-1":        
             condition = {"collection_name": knowledge_base}
             # print(condition)
 
             docs = docsearch.similarity_search(query, k=3, filter=condition)
-            # print("Got here  >>>", docs)
+            print("Got here1  >>>", docs)
 
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")

@@ -44,14 +44,15 @@ def get_log_data():
         conversations = Conversation.get_by_session(session_id)
         imageUrl = ''
 
-
+        
         convLists = []
         for log in conversations:
             log_json = log.json()
-
-            bot = Bot.get_by_id(log.bot_id)
-            if bot.avatar and imageUrl == '':
-                imageUrl = get_url_from_name(bot.avatar)
+            # print(log.bot_id)
+            # bot = Bot.get_by_id(log.bot_id)
+            # print(bot)
+            # if bot.avatar and imageUrl == '':
+            #     imageUrl = get_url_from_name(bot.avatar)
             convLists.append(log_json)
         # print(convLists)
         return jsonify({'log':chatLog.json(), 'conversation':convLists, 'bot_avatar':imageUrl}), 200

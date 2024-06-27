@@ -110,7 +110,7 @@ def update_mautic_user(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.post(update_user_url, data=payload, headers=headers)
+        response = requests.put(update_user_url, data=payload, headers=headers)
         
         print(response.status_code)
         print(response.json())

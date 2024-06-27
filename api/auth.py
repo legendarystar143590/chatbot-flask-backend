@@ -169,7 +169,7 @@ def get_users():
 @jwt_required()
 def update_user():
     data = request.get_json()
-    user = User.get_by_userID(data['userID'])
+    user = User.get_by_userID(data['userId'])
     if user:
         user.first_name = data['first_name']
         user.last_name = data['last_name']

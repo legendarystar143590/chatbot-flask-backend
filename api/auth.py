@@ -209,7 +209,7 @@ def forgot_password():
     url = request.host_url + 'reset/l'
     user = User.query.filter_by(email=email).first()
 
-    reset_url = f'http://localhost:3000/reset-password?token={token}'
+    reset_url = f'https://login.aiana.io/reset-password?token={token}'
     data['password_reset_link'] = reset_url
     if mautic_reset_password(data, user.mauticId) == 1:
         return jsonify({'message': 'Password reset link sent to email!'}), 200

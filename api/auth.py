@@ -209,7 +209,7 @@ def forgot_password():
     url = request.host_url + 'reset/l'
     user = User.query.filter_by(email=email).first()
 
-    reset_url = f'http://login.aiana.io/reset-password/{token}'
+    reset_url = f'http://localhost:3000/reset-password?token={token}'
     data['password_reset_link'] = reset_url
     if mautic_reset_password(data, user.mauticId) == 1:
         return jsonify({'message': 'Password reset link sent to email!'}), 200
@@ -217,7 +217,6 @@ def forgot_password():
         return jsonify({'message': 'Error sending email!'}), 500
 
 @user_blueprint.route('/reset_with_token', methods = ['GET', 'POST'])
-@jwt_required()
 def reset_with_token():
     data = request.get_json()
     print(data)

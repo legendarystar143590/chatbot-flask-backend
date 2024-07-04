@@ -123,8 +123,11 @@ def get_chatbot_data():
             if bot_data['knowledge_base'] != "-1":
                 print(bot_data['knowledge_base'])
                 knowledge_base = KnowledgeBase.query.filter_by(unique_id=bot_data['knowledge_base']).first()
-                print(knowledge_base)
-                bot_data['knowledge_base'] = knowledge_base.name
+                if knowledge_base:
+                    print(knowledge_base)
+                    bot_data['knowledge_base'] = knowledge_base.name
+                else:
+                    bot_data['knowledge_base'] = ''
         else:
             bot_data = '-1'
         if not user_id:

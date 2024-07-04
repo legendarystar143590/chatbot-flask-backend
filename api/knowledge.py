@@ -285,6 +285,10 @@ def del_knowledgebase():
     data = request.get_json()
     id = data["baseId"]
     kb = KnowledgeBase.get_by_id(id)
+    unique_id = kb.unique_id
+    bot = Bot.query.filter_by(knowledge_base=unique_id).first()
+    if bot:
+        return jsonify({'status':'exist'}), 400
     if delKnowledgeBase(kb.unique_id):
         KnowledgeBase.delete_by_id(id)
         return jsonify({'status': 'success'}), 201

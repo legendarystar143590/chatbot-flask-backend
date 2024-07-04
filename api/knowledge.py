@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import jwt_required
 from flask_cors import cross_origin
-from models import DocumentKnowledge, Website, Text, KnowledgeBase
+from models import DocumentKnowledge, Website, Text, KnowledgeBase, Bot
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import TextLoader
@@ -289,7 +289,7 @@ def del_knowledgebase():
     bot = Bot.query.filter_by(knowledge_base=unique_id).first()
     if bot:
         return jsonify({'status':'exist'}), 400
-    if delKnowledgeBase(kb.unique_id):
+    elif delKnowledgeBase(kb.unique_id):
         KnowledgeBase.delete_by_id(id)
         return jsonify({'status': 'success'}), 201
     else:

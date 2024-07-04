@@ -13,7 +13,6 @@ import os
 from werkzeug.utils import secure_filename
 import json
 
-
 knowledge_blueprint = Blueprint('lknowledge_blueprintueprint', __name__)
 
 @knowledge_blueprint.route('/upload_document', methods=['POST'])

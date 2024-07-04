@@ -18,7 +18,7 @@ def generate_kb_from_url(chunks, unique_id, doc_index, _type):
 
 def tiktoken_doc_split(text):
     text_splitter = CharacterTextSplitter(
-                separator = "\n", chunk_size=1000, chunk_overlap=200, length_function = len,
+                separator = "\n", chunk_size=1200, chunk_overlap=200, length_function = len,
             )
     chunks = text_splitter.split_documents(text)
     print("Chunks length >>>>", len(chunks))
@@ -26,7 +26,7 @@ def tiktoken_doc_split(text):
 
 def tiktoken_text_split(text):
     text_splitter = CharacterTextSplitter(
-                separator = "\n", chunk_size=1000, chunk_overlap=200, length_function = len,
+                separator = "\n", chunk_size=1200, chunk_overlap=200, length_function = len,
             )
     chunks = text_splitter.split_text(text)
     print("Chunks length >>>>", len(chunks))

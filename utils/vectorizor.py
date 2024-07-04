@@ -70,6 +70,8 @@ def upsertDocToIndex(index_name, collection_name, doc_index, chunks, _type):
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
         vectors = []
         count = 0
+        batch_size = 100
+        p_index = pc.Index(index_name)
         for chunk in chunks:
             chunk.metadata['collection_name'] = collection_name
             chunk.metadata['doc_index'] = doc_index
@@ -82,9 +84,14 @@ def upsertDocToIndex(index_name, collection_name, doc_index, chunks, _type):
             s_vector['values'] = embeddings.embed_query(chunk.page_content)
             s_vector['metadata'] = metadata
             vectors.append(s_vector)
-            count +=1
-        p_index = pc.Index(index_name)
-        p_index.upsert(vectors=vectors)
+            if len(vectors) % batch_size == 0:
+                p_index.upsert(vectors=vectors)
+                vectors = []
+            
+            count += 1
+        if vectors:
+            p_index.upsert(vectors=vectors)
+
     except Exception as e:
         print("Error in upsertDataToIndex()", str(e))
         pass

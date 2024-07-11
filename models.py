@@ -450,9 +450,9 @@ class Order(db.Model):
     user_index = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     bot_name = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.String(255), nullable=False)
 
-    def __init__(self, sessoin_id, user_id, website, user_index, bot_name, email, status, content):
+    def __init__(self, sessoin_id, user_id, website, user_index, bot_name, email, status, content, createdAt):
         self.sessoin_id = sessoin_id
         self.bot_name = bot_name
         self.user_id = user_id
@@ -461,6 +461,7 @@ class Order(db.Model):
         self.email = email
         self.status = status
         self.content = content
+        self.created_at = createdAt
     
     def save(self):
         db.session.add(self)
@@ -517,7 +518,7 @@ class Order(db.Model):
             'website': self.website,
             'status': self.status,
             'content': self.content,
-            'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+            'created_at': self.created_at # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
         }
 
     def __repr__(self):

@@ -19,4 +19,4 @@ Then, run the following in the command line and your application will be availab
 python app.py
 ```
 ## Running Production mode
-gunicorn --config gunicorn_conf.py app:app
+pm2 start "gunicorn -w 4 -t 8 -b 0.0.0.0:5000 --timeout 600 app:app"

@@ -89,7 +89,7 @@ def get_chatbots():
         bots = Bot.query.filter_by(user_id=user_id).all()
         bot_list = []
         for bot in bots:
-            knowledgebase = KnowledgeBase.query.filter_by(unique_id=bot.unique_id).first()
+            knowledgebase = KnowledgeBase.query.filter_by(unique_id=bot.knowledge_base).first()
             bot_data = bot.json()  # Assuming that this method converts the bot instance to a dict
             if bot.avatar:  # Check if the bot has an avatar
                 avatarUrl = get_url_from_name(bot.avatar)

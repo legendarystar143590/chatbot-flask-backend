@@ -87,7 +87,7 @@ def register():
         # Company Info
         com_street = data['com_street']
         com_city = data['com_city']
-        com_country = data['com_country']
+        com_country = data['com_country']  
         com_name = data['com_name']
         com_vat = data['com_vat']
         com_street_number = data['com_street_number']

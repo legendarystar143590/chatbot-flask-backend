@@ -8,6 +8,7 @@ from langchain_community.document_loaders import TextLoader
 from utils.provider import generate_kb_from_document, generate_kb_from_url,  tiktoken_text_split, tiktoken_doc_split 
 from utils.scraper import scrape_url
 from utils.vectorizor import delDocument, delKnowledgeBase
+from utils.common import get_url_from_name
 import uuid
 import os
 from werkzeug.utils import secure_filename
@@ -127,7 +128,8 @@ def get_knowledgebases():
                 for bot in bots:
                 
                     if bot.avatar:
-                        base_json['bot_avatar'].append(bot.avatar)
+                        avatarUrl = get_url_from_name(bot.avatar)
+                        base_json['bot_avatar'].append(avatarUrl)
                     else:
                         base_json['bot_avatar'].append('')
 

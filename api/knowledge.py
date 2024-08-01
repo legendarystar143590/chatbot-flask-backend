@@ -116,8 +116,23 @@ def get_knowledgebases():
             return jsonify({'error': 'user_id is required'}), 400
 
         bases = KnowledgeBase.query.filter_by(user_id=user_id).all()
-        knowledge_bases_list = [base.json() for base in bases]
-        return jsonify(knowledge_bases_list), 200
+        bases_list = []
+        for base in bases:
+            avatars = []
+            base_json = base.json()
+            bots = Bot.query.filter_by(knowledge_base=base.unique_id).all()
+            print(bots)
+            base_json['bot_avatar'] = []
+            if bots:
+                for bot in bots:
+                
+                    if bot.avatar:
+                        base_json['bot_avatar'].append(bot.avatar)
+                    else:
+                        base_json['bot_avatar'].append('')
+
+            bases_list.append(base_json)
+        return jsonify(bases_list), 200
     except ValueError:
         # If the provided user_id cannot be converted to an integer, return an error
         return jsonify({'error': 'Invalid user_id format. It should be an integer.'}), 400

@@ -17,7 +17,13 @@ def get_chat():
         
         for log in chatLog:
             log_json = log.json()
-            
+            bot = Bot.query.filter_by(id=log.bot_name).first()
+            log_json['bot_name'] = bot.name
+            log_json['bot_active'] = bot.active
+            if bot.avatar:
+                log_json['bot_avatar'] = get_url_from_name(bot.avatar)
+            else:
+                log_json['bot_avatar'] = '' 
             # start_time = datetime.fromisoformat(log_json["created_at"])
             # end_time = datetime.fromisoformat(log_json["ended_at"])
              
@@ -56,6 +62,21 @@ def get_log_data():
             convLists.append(log_json)
         # print(convLists)
         return jsonify({'log':chatLog.json(), 'conversation':convLists, 'bot_avatar':imageUrl}), 200
+    
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error':'Server Error!'}), 500
+
+@log_blueprint.route('/del_chatlog', methods=['POST'])
+@jwt_required()
+def del_chatlog():
+    try:
+        data = request.get_json()
+        session_id = data['sessionId']
+        chatLog = ChatLog.del_by_session(session_id)
+        convs = Conversation.del_by_session_id(session_id)
+        
+        return jsonify({"message":"success"}), 201
     
     except Exception as e:
         print(str(e))

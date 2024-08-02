@@ -274,7 +274,7 @@ def query():
             chat_log.ended_at = created_at
             chat_log.save()
         else:
-            new_log = ChatLog(user_id, bot.name, session_id, created_at, created_at)
+            new_log = ChatLog(user_id, bot.id, session_id, created_at, created_at)
             new_log.save()
 
         return jsonify({'message': result, 'solve':solve}), 200

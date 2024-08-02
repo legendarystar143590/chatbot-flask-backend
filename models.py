@@ -424,6 +424,16 @@ class Conversation(db.Model):
         except Exception as e:
             db.session.rollback()
             raise e
+    @classmethod
+    def del_by_session_id(cls, session_id):
+        """Deletes all conversations for a given bot_id"""
+        try:
+            num_rows_deleted = db.session.query(cls).filter(cls.session_id == session_id).delete()
+            db.session.commit()
+            return num_rows_deleted
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     def json(self):
         return {
@@ -552,6 +562,15 @@ class ChatLog(db.Model):
     @staticmethod
     def get_by_session(id):
         return ChatLog.query.filter_by(session_id=id).first()
+    @staticmethod
+    def del_by_session(cls, id):
+        try:
+            num_rows_deleted = db.session.query(cls).filter(cls.session_id == id).delete()
+            db.session.commit()
+            return num_rows_deleted
+        except Exception as e:
+            db.session.rollback()
+            raise e
     
     @staticmethod
     def get_by_user(id):

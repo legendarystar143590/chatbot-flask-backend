@@ -17,6 +17,8 @@ def get_chat():
         
         for log in chatLog:
             log_json = log.json()
+            print(log.bot_name)
+        
             bot = Bot.query.filter_by(id=log.bot_name).first()
             log_json['bot_name'] = bot.name
             log_json['bot_active'] = bot.active
@@ -73,7 +75,7 @@ def del_chatlog():
     try:
         data = request.get_json()
         session_id = data['sessionId']
-        chatLog = ChatLog.del_by_session(session_id)
+        ChatLog.del_by_session(session_id)
         convs = Conversation.del_by_session_id(session_id)
         
         return jsonify({"message":"success"}), 201

@@ -90,6 +90,11 @@ class User(db.Model):
         user = User.query.filter_by(email=email).first()
         return user
 
+    @staticmethod
+    def del_by_id(_id):
+        user = User.get_by_userID(_id)
+        db.session.delete(user)
+        db.session.commit()
 
     def get_reset_token(self, expires_sec=1800): #<---HERE
         s=Serializer(current_app.config['SECRET_KEY'], expires_sec) #<---HERE
@@ -176,15 +181,9 @@ class Bot(db.Model):
     @staticmethod
     def del_by_id(_id):
         bot = Bot.get_by_id(_id)
-        # conversations = Conversation.query.filter_by(bot_id=_id).all()
-        # for conversation in conversations:
-        #     db.session.delete(conversation)
-        #     db.session.commit()
-        
-        # chatLogs = ChatLog.query.filter_by(bot_name=bot.name).all()
-        # for log in chatLogs:
-        #     db.session.delete(log)
-        #     db.session.commit()
+        chatlogs = ChatLog.query.filter_by(bot_name=_id).all()
+        for chatlog in chatlogs:
+            db.seesion.delete(chatlog)
         db.session.delete(bot)
         db.session.commit()
 
@@ -563,11 +562,11 @@ class ChatLog(db.Model):
     def get_by_session(id):
         return ChatLog.query.filter_by(session_id=id).first()
     @staticmethod
-    def del_by_session(cls, id):
+    def del_by_session(id):
         try:
-            num_rows_deleted = db.session.query(cls).filter(cls.session_id == id).delete()
+            bot = ChatLog.get_by_session(id)
+            db.session.delete(bot)
             db.session.commit()
-            return num_rows_deleted
         except Exception as e:
             db.session.rollback()
             raise e

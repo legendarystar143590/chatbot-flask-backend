@@ -120,7 +120,7 @@ def register():
         print("Error:", str(e))
         return jsonify({'error': str(e)}), 500
 
-@user_blueprint.route('get_user', methods=['POST'])
+@user_blueprint.route('/get_user', methods=['POST'])
 @cross_origin()
 @jwt_required()
 def get_user():
@@ -131,7 +131,34 @@ def get_user():
         return user.json(), 200
     else:
         return jsonify({'error': 'Not found user!'}), 400
-@user_blueprint.route('get_user_as_admin', methods=['POST'])
+
+@user_blueprint.route('/del_user', methods=['POST'])
+@cross_origin()
+@jwt_required()
+def del_user():
+    try:
+        data = request.get_json()
+        userID = data['userID']
+        targetUserId = data['targetId']
+
+        user = User.get_by_userID(userID)
+        if user:
+            if user.role == 'admin':
+                targetUser = User.get_by_userID(targetUserId)
+                if targetUser:
+                    User.del_by_id(targetUserId)
+                    return jsonify({'message':'success'}), 201
+                else:
+                    return jsonify({'error': 'Not found user!'}), 400
+            else:
+                return jsonify({'error': 'You do not have right access!'}), 400
+        else:
+            return jsonify({'error': 'You do not have right access!'}), 403
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error': 'Server is busy. Try later!'}), 500
+
+@user_blueprint.route('/get_user_as_admin', methods=['POST'])
 @cross_origin()
 @jwt_required()
 def get_user_as_admin():
@@ -164,7 +191,7 @@ def get_users():
         print('Error in get_users()', str(e))
         return jsonify({'messsage':'Server Error!'}), 500
         
-@user_blueprint.route('update_user', methods=['POST'])
+@user_blueprint.route('/update_user', methods=['POST'])
 @cross_origin()
 @jwt_required()
 def update_user():

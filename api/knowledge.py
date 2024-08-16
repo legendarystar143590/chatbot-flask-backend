@@ -124,9 +124,10 @@ def get_knowledgebases():
             bots = Bot.query.filter_by(knowledge_base=base.unique_id).all()
             print(bots)
             base_json['bot_avatar'] = []
+            base_json['bot_names'] = []
             if bots:
                 for bot in bots:
-                    base_json['bot_name'] = bot.name
+                    base_json['bot_names'].append(bot.name)
                     if bot.avatar:
                         avatarUrl = get_url_from_name(bot.avatar)
                         base_json['bot_avatar'].append(avatarUrl)

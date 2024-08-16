@@ -126,7 +126,7 @@ def get_knowledgebases():
             base_json['bot_avatar'] = []
             if bots:
                 for bot in bots:
-                
+                    base_json['bot_name'] = bot.name
                     if bot.avatar:
                         avatarUrl = get_url_from_name(bot.avatar)
                         base_json['bot_avatar'].append(avatarUrl)

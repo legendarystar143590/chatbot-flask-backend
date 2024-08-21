@@ -296,8 +296,8 @@ class Text(db.Model):
     __tablename__ = 'texts'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    question = db.Column(db.String(255), nullable=True)
-    answer = db.Column(db.String(255), nullable=True)
+    question = db.Column(db.Text(5000), nullable=True)
+    answer = db.Column(db.String(5000), nullable=True)
     unique_id = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 

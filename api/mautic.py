@@ -227,7 +227,7 @@ def login_mautic(data, mauticId):
         # Sending the POST request
         response = requests.put(update_user_url, data=payload, headers=headers)
         
-        print(response.status_code)
+        print(response)
         if response.status_code == 200:
             print("User updated successfully")
             response_data = response.json()

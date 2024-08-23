@@ -183,7 +183,7 @@ class Bot(db.Model):
         bot = Bot.get_by_id(_id)
         chatlogs = ChatLog.query.filter_by(bot_name=_id).all()
         for chatlog in chatlogs:
-            db.seesion.delete(chatlog)
+            db.session.delete(chatlog)
         db.session.delete(bot)
         db.session.commit()
 

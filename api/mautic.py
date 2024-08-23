@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import requests
 import os
 import json
+import datetime
 load_dotenv()
 
 MAUTIC_BASE_URL = os.getenv('MAUTIC_BASE_URL')
@@ -191,6 +192,7 @@ def get_access_token():
 
 def login_mautic(data, mauticId):
     try:
+        now = datetime.datetime.now()
         payload =  {
             "language": data["language"],
             "aiana_status": "active",
@@ -207,6 +209,7 @@ def login_mautic(data, mauticId):
             "company_city": data["com_city"],
             "company_country": data["com_country"],
             "company_website_url": data["com_website"],
+            "last_login":now,
             "aiana_status": "registered",
             "aiana_environment": "TEST",
             "license": "FREE",

@@ -153,6 +153,7 @@ def del_bot():
     try:
         data = request.get_json()
         bot_id = data["botId"]
+        print(bot_id)
         if not bot_id:
             return jsonify({'error': 'bot_id is required'}), 400
 

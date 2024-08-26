@@ -152,13 +152,13 @@ def detect_language(text):
         return 'en'  # default to English if detection fails
 
 #  Generate the response
-def get_answer(bot_id, session_id, query, knowledge_base, lang):
+def get_answer(bot_id, session_id, query, knowledge_base):
     try:
         bot = Bot.get_by_id(bot_id)
         starter = f"""
         Q:
         Please follow these guidelines when responding:
-        1. Always reply in {lang}.
+        1. Always reply in the language of the human_input.
         2. Determine if the user's query is technical or general.
         3. For technical queries:
         - Summarize the context and provide relevant information if available.
@@ -169,7 +169,8 @@ def get_answer(bot_id, session_id, query, knowledge_base, lang):
         5. Always check the context before determining your response and adhere strictly to these guidelines.
         6. Your name is {bot.name}. Remember this throughout the conversation, and if asked, state your name.
 
-        Note: Ensure that all responses, including the translated default message, are in {lang}.
+        Note: Ensure that all responses, including the translated default message, are in the language of the human_input.
+        human_input:{query}
 
         """
         template = """"""

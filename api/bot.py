@@ -251,22 +251,22 @@ def query():
         user_id = data['userId']
         session_id = data['sessionId']
         created_at = data['createdAt']
-        lang = data['lang']
-        language_codes = {
-            10: 'English',
-            20: 'Dutch',
-            30: 'French',
-            40: 'Spanish'
-        }
-        if lang in language_codes:
-            lang = language_codes[lang]
-        else:
-            lang = 'English'
+        # lang = data['lang']
+        # language_codes = {
+        #     10: 'English',
+        #     20: 'Dutch',
+        #     30: 'French',
+        #     40: 'Spanish'
+        # }
+        # if lang in language_codes:
+        #     lang = language_codes[lang]
+        # else:
+        #     lang = 'English'
         print("Respond >>>>", created_at)
         if bot_id:
             bot = Bot.query.filter_by(id=bot_id).first()
         knowledge_base = bot.knowledge_base
-        result = generate(bot_id, session_id, query, knowledge_base, lang)
+        result = generate(bot_id, session_id, query, knowledge_base)
         solve = True
         if "If so, leave me your email" in result or "votre adresse e-mail" in result or "correo electrónico" in result or "laissez-moi votre" in result or "laat me dan je e-mailadres achter" in result:
             solve = False

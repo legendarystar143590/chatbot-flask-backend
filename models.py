@@ -214,12 +214,14 @@ class DocumentKnowledge(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     type = db.Column(db.String(255), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
+    file_size = db.Column(db.String(255), nullable=False)
     unique_id = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, type, filename, unique_id):
+    def __init__(self, type, filename, file_size, unique_id):
         self.type = type
         self.filename = filename
+        self.file_size = file_size
         self.unique_id = unique_id
     
     def save(self):
@@ -246,6 +248,7 @@ class DocumentKnowledge(db.Model):
             'type': self.type,
             'filename': self.filename,
             'unique_id': self.unique_id,
+            'file_size':self.file_size,
             'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
         }
 

@@ -115,7 +115,7 @@ def update_mautic_user(data, mauticId):
         
         print(response.status_code)
         print(response.json())
-        if response.status_code == 200:
+        if response.status_code == 200 or response.status_code==201:
             print("User updated successfully")
             response_data = response.json()
             contact_id = response_data['contact']['id']

@@ -222,6 +222,12 @@ def update_knowledge_base():
                 file.save('uploads/' + file.filename)
                 file_path = 'uploads/' + file.filename
                 filename = file.filename
+                filesize = os.path.getsize(file_path)/1024
+                
+                if filesize > 512:
+                    filesize = f"{(filesize/1024):.2f} MB"
+                else:
+                    filesize = f"{filesize:.2f} KB"
                 extension = os.path.splitext(secure_filename(file.filename))[1]
                 loader = None
                 type_of_knowledge = ''
@@ -239,7 +245,7 @@ def update_knowledge_base():
                 data = loader.load()
 
                 chunks = tiktoken_doc_split(data)
-                new_doc = DocumentKnowledge(filename=filename, type=extension, unique_id=unique_id)
+                new_doc = DocumentKnowledge(filename=filename, file_size=filesize, type=extension, unique_id=unique_id)
                 new_doc.save()
                 generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
                 

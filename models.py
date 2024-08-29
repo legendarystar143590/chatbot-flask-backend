@@ -28,7 +28,7 @@ class User(db.Model):
     com_country = db.Column(db.String(255), nullable=False)
     com_website = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255), nullable = False, default = 'user')
-    last_login_at = db.Column(db.DateTime, nullable = True)
+    last_login = db.Column(db.DateTime, nullable = True)
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
     def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website):
@@ -66,6 +66,12 @@ class User(db.Model):
     def get_all_users():
         return User.query.order_by(User.role).all()
 
+    @staticmethod
+    def update_login(mail):
+        user = User.query.filter_by(email=mail).first()
+        user.last_login = str(datetime.now())
+        db.session.commit()
+    
     def check_user_exist(email):
         db_user = User.query.filter(User.email==email).first()
         if db_user is None:

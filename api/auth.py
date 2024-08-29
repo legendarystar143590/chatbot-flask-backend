@@ -54,10 +54,12 @@ def login():
             mautic_data["com_city"]=user.com_city
             mautic_data["com_country"]=user.com_country
             mautic_data["com_website"]=user.com_website
+            mautic_data["last_login"]=login_datetime
             if login_mautic(mautic_data, user.mauticId) == 'error':
                 return jsonify({'error': 'Server is busy. Try again later!'}), 400
                 
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
+            User.update_login(email)
             # refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
             return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'role':user.role}), 200
             # set_access_cookies(response, token)

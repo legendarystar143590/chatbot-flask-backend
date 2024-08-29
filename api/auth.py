@@ -27,7 +27,7 @@ def login():
         email = data['email']
         password = data['password']
         user = User.query.filter_by(email=email).first()
-
+        login_datetime = datetime.datetime.now()
         if not user:
             return jsonify({'error': 'User not found.'}), 403
 
@@ -36,7 +36,7 @@ def login():
         print(f"Provided password: {data['password']}")
         mautic_data = {}
         # Check if the provided password matches the stored password hash
-        if check_password_hash(user.password, data['password']):
+        if check_password_hash(user.password, password):
             total_bots = Bot.query.filter_by(user_id=user.id).count()
             active_bots = Bot.query.filter_by(user_id=user.id, active=1).count()
             mautic_data["language"] = user.language

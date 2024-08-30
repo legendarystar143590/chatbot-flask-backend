@@ -61,7 +61,7 @@ def login():
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             User.update_login(email)
             # refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
-            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'role':user.role}), 200
+            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'first_name':user.first_name, 'last_name':user.last_name, 'role':user.role}), 200
             # set_access_cookies(response, token)
         else:
             print("Password verification failed.")  # Additional debug information

@@ -12,7 +12,8 @@ from api.bot import bot_blueprint
 from api.knowledge import knowledge_blueprint
 from api.chatlog import log_blueprint
 from api.tickets import ticket_blueprint
-from models import db, User
+from api.payment import payment_blueprint
+from models import db, User, BillingPlan
 from datetime import timedelta
 from utils.common import get_bucket_name
 load_dotenv()
@@ -55,7 +56,7 @@ app.register_blueprint(bot_blueprint, url_prefix='/api')
 app.register_blueprint(knowledge_blueprint, url_prefix='/api')
 app.register_blueprint(log_blueprint, url_prefix='/api')
 app.register_blueprint(ticket_blueprint, url_prefix='/api')
-
+app.register_blueprint(payment_blueprint)
 
 get_bucket_name()
 @app.route("/")

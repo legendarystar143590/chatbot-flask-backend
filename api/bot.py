@@ -1,15 +1,13 @@
 from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from werkzeug.utils import secure_filename
-from models import Bot, KnowledgeBase, Conversation, ChatLog, Order, User
+from models import Bot, KnowledgeBase, Conversation, ChatLog, BillingPlan, User
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
 from utils.common import upload_image_to_spaces, get_url_from_name
 import uuid
 from datetime import datetime
-from io import BytesIO
 import os
-import base64
 from api.mautic import get_access_token, login_mautic
 
 bot_blueprint = Blueprint('bot_blueprint', __name__)
@@ -28,8 +26,20 @@ def create_bot():
         start_time = data['start_time'] 
         end_time = data['end_time'] 
         knowledge_base = data['knowledge_base']
-        print("Avatar >>>", avatar)
-        image_url = ""
+
+        # Get user from id
+        user = User.get_by_userID(user_id)
+
+        userBillingPlan = user.billing_plan
+        bots = Bot.get_bots_from_user_id(user_id=user_id)
+
+        # Check the limitation
+        limits = BillingPlan.get_by_code(userBillingPlan).max_parallel_bots
+        if limits < len(bots) + 1:
+           return jsonify({'error': 'limit'}), 403
+ 
+
+    
         unique_filename = ''
         index = str(uuid.uuid4())
         if avatar:
@@ -251,6 +261,11 @@ def query():
         user_id = data['userId']
         session_id = data['sessionId']
         created_at = data['createdAt']
+
+        # Check the limits
+        logs = ChatLog.get_logs_by_bot_id(bot_id=bot_id)
+        user = User.get_by_userID(id=user_id)
+        sessionLimits = BillingPlan.query.filter_by(code=user.billing_plan)
         # lang = data['lang']
         # language_codes = {
         #     10: 'English',

@@ -28,10 +28,11 @@ class User(db.Model):
     com_country = db.Column(db.String(255), nullable=False)
     com_website = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255), nullable = False, default = 'user')
+    billing_plan = db.Column(db.String(255), nullable = False, default = 'aiana_try')
     last_login = db.Column(db.DateTime, nullable = True)
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
-    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website):
+    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website, billing_plan):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
@@ -48,6 +49,7 @@ class User(db.Model):
         self.com_postal = com_postal
         self.com_country = com_country
         self.com_website = com_website
+        self.billing_plan = billing_plan
     
     # Add an index to the id column
     __table_args__ = (
@@ -80,18 +82,31 @@ class User(db.Model):
             return True
     
     def save(self):
+        db.session.add(self)
         db.session.commit()
 
     @staticmethod
-    def get_by_userID(name):        
-        db_user = User.query.filter_by(id=name).first()
+    def get_by_userID(id):        
+        db_user = User.query.filter_by(id=id).first()
         return db_user
+
+    @staticmethod
+    def get_billing_plan(email):        
+        db_user = User.query.filter_by(email=email).first()
+        return db_user.billing_plan
 
     @staticmethod
     def get_by_index(index):        
         db_user = User.query.filter_by(index=index).first()
         return db_user
     
+    @staticmethod
+    def update_billing_plan(email, plan):        
+        db_user = User.query.filter_by(email=email).first()
+        db_user.billing_plan = plan
+        db.session.commit()
+        return db_user
+
     @staticmethod
     def get_by_email(email):
         user = User.query.filter_by(email=email).first()
@@ -103,19 +118,6 @@ class User(db.Model):
         db.session.delete(user)
         db.session.commit()
 
-    def get_reset_token(self, expires_sec=1800): #<---HERE
-        s=Serializer(current_app.config['SECRET_KEY'], expires_sec) #<---HERE
-        return s.dumps({'user_id': self.id}).decode('utf-8') #<---HERE
-
-    @staticmethod#<-- HERE-This means self is not an argument the function should expect
-    def verify_reset_token(token): #<---HERE
-        s=Serializer(current_app.config['SECRET_KEY']) #<---HERE
-        try: #<---HERE
-            user_id = s.loads(token)['user_id'] #<---HERE
-        except: #<---HERE
-            return None #<---HERE
-        return Users.query.get(user_id) #<---HERE
-    
     def json(self):
         return {
             'id': self.id,
@@ -137,7 +139,8 @@ class User(db.Model):
             'com_website': self.com_website,
             'role': self.role,
             'created_at':self.created_at,
-            'last_login':self.last_login
+            'last_login':self.last_login,
+            'billing_plan':self.billing_plan,
         }
 
     def __repr__(self):
@@ -156,6 +159,7 @@ class Bot(db.Model):
     start_time = db.Column(db.String(255), nullable=False)
     end_time = db.Column(db.String(255), nullable=False)
     knowledge_base = db.Column(db.String(255), nullable=False)
+    monthly_session_number = db.Column(db.Integer, nullable = False, default=0)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, user_id, index, name, avatar, color, active, start_time, end_time, knowledge_base):
@@ -194,7 +198,10 @@ class Bot(db.Model):
             db.session.delete(chatlog)
         db.session.delete(bot)
         db.session.commit()
-
+    @staticmethod
+    def get_bots_from_user_id(user_id):
+        bots = Bot.query.filter_by(user_id=user_id).all()
+        return bots
     @staticmethod
     def get_all_bots():
         return Bot.query.all()
@@ -354,7 +361,7 @@ class KnowledgeBase(db.Model):
         self.name = name
         self.unique_id = unique_id
         self.user_id = user_id
-    
+        
     def save(self):
         db.session.add(self)
         db.session.commit()
@@ -365,7 +372,7 @@ class KnowledgeBase(db.Model):
     
     @staticmethod
     def get_all_knowledgebases():
-        return knowledgeBase.query.all()
+        return KnowledgeBase.query.all()
     @staticmethod
     def delete_by_id(knowledgebase_id):
         knowledgebase = KnowledgeBase.get_by_id(knowledgebase_id)
@@ -572,6 +579,7 @@ class ChatLog(db.Model):
     @staticmethod
     def get_by_session(id):
         return ChatLog.query.filter_by(session_id=id).first()
+    
     @staticmethod
     def del_by_session(id):
         try:
@@ -589,6 +597,10 @@ class ChatLog(db.Model):
     @staticmethod
     def get_all_texts():
         return Conversation.query.all()
+  
+    @staticmethod
+    def get_logs_by_bot_id(bot_id):
+        return ChatLog.query.filter_by(bot_id=bot_id).all()
 
     @classmethod
     def del_by_bot_id(cls, bot_id):
@@ -613,3 +625,57 @@ class ChatLog(db.Model):
 
     def __repr__(self):
         return f"<ChatLog {self.id}>"
+
+class BillingPlan(db.Model):
+    __tablename__ = 'billing_plans'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    code = db.Column(db.String(255), nullable=False, default="aiana_try")
+    max_parallel_bots = db.Column(db.Integer, nullable=False, default=1)
+    max_sessions_per_month = db.Column(db.Integer, nullable=False, default=25)
+    max_linked_websites = db.Column(db.Integer, nullable=False, default=1)
+    max_storage = db.Column(db.Integer, nullable=False, default=50) # MB in unit
+    updated_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
+
+    def __init__(self, code,  max_parallel_bots, max_sessions_per_month, max_linked_websites, max_storage):
+        self.max_linked_websites = max_linked_websites
+        self.max_storage = max_storage
+        self.max_parallel_bots = max_parallel_bots
+        self.code = code
+        self.max_sessions_per_month = max_sessions_per_month
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return BillingPlan.query.get(id)
+
+    @staticmethod
+    def get_by_code(code):
+        return BillingPlan.query.filter_by(code=code).first()
+   
+    @staticmethod
+    def del_by_code(code):
+        try:
+            plan = BillingPlan.get_by_session(code)
+            db.session.delete(plan)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def json(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'max_parallel_bots': self.max_parallel_bots,
+            'max_sessions_per_month': self.max_sessions_per_month,
+            'max_linked_websites': self.max_linked_websites,  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
+            'max_storage': self.max_storage,
+            'updated_at':self.updated_at
+        }
+
+    def __repr__(self):
+        return f"<BillingPlan {self.id}>"

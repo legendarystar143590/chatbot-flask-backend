@@ -180,7 +180,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
         Human: {human_input}
         A: """
         template =starter + end
-        print(template)
+        # print(template)
         
         prompt = PromptTemplate(
             input_variables=["chat_history", "human_input"],
@@ -197,7 +197,7 @@ def get_answer(bot_id, session_id, query, knowledge_base):
             # print(condition)
 
             docs = docsearch.similarity_search(query, k=3, filter=condition)
-            print("Got here1  >>>", docs)
+            # print("Got here1  >>>", docs)
 
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")

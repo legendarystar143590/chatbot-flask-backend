@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import current_app
 from sqlalchemy.sql import func
+from sqlalchemy import and_, not_
 from datetime import datetime
 from uuid import uuid4
 from utils.common import get_language_name
@@ -602,7 +603,12 @@ class ChatLog(db.Model):
   
     @staticmethod
     def get_logs_by_bot_id(bot_id):
-        return ChatLog.query.filter_by(bot_id=bot_id).all()
+        return ChatLog.query.filter(
+            and_(
+                ChatLog.bot_name == bot_id,
+                not_(ChatLog.website == 'https://login.aiana.io')
+            )
+        ).all()
 
     @classmethod
     def del_by_bot_id(cls, bot_id):
@@ -682,3 +688,50 @@ class BillingPlan(db.Model):
 
     def __repr__(self):
         return f"<BillingPlan {self.id}>"
+
+class RegisteredWebsite(db.Model):
+    __tablename__ = 'registered_websites'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    bot_id = db.Column(db.Integer, nullable=False, default=0)
+    domain = db.Column(db.String(255), nullable=False, default="https://login.aiana.io")
+    updated_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
+
+    def __init__(self, bot_id,  domain):
+        self.domain = domain
+        self.bot_id = bot_id
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_id(id):
+        return RegisteredWebsite.query.get(id)
+
+    @staticmethod
+    def get_by_bot_id(bot_id):
+        return RegisteredWebsite.query.filter_by(bot_id=bot_id).all()
+   
+    @staticmethod
+    def del_by_bot_id(bot_id):
+        try:
+            websites = RegisteredWebsite.get_by_bot_id(bot_id)
+            for website in websites:
+                db.session.delete(website)
+                db.session.commit()
+           
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def json(self):
+        return {
+            'id': self.id,
+            'bot_id': self.bot_id,
+            'domain': self.domain,
+            'updated_at':self.updated_at
+        }
+
+    def __repr__(self):
+        return f"<RegisteredWebsite {self.id}>"

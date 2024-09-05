@@ -263,9 +263,17 @@ def query():
         created_at = data['createdAt']
         website = data['website']
         # Check the limits
+        chat_log = ChatLog.get_by_session(session_id)
         logs = ChatLog.get_logs_by_bot_id(bot_id=bot_id)
         user = User.get_by_userID(id=user_id)
         sessionLimits = BillingPlan.query.filter_by(code=user.billing_plan).first().max_sessions_per_month
+        # print(sessionLimits)
+        # print(bot_id)
+        # print(logs)
+        if sessionLimits <= len(logs) and website != None:
+            if chat_log is None:
+                return jsonify({'error': 'Maximum Session Exceeds'}), 403
+             
         # lang = data['lang']
         # language_codes = {
         #     10: 'English',
@@ -277,7 +285,7 @@ def query():
         #     lang = language_codes[lang]
         # else:
         #     lang = 'English'
-        print("Respond >>>>", created_at)
+        # print("Respond >>>>", created_at)
         if bot_id:
             bot = Bot.query.filter_by(id=bot_id).first()
         knowledge_base = bot.knowledge_base
@@ -285,7 +293,6 @@ def query():
         solve = True
         if "If so, leave me your email" in result or "votre adresse e-mail" in result or "correo electrónico" in result or "laissez-moi votre" in result or "laat me dan je e-mailadres achter" in result:
             solve = False
-        chat_log = ChatLog.get_by_session(session_id)
         if chat_log:
             chat_log.ended_at = created_at
             chat_log.save()

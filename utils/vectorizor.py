@@ -220,3 +220,4 @@ def get_answer(bot_id, session_id, query, knowledge_base):
     except Exception as e:
         print(str(e))
         return "Network error"
+    

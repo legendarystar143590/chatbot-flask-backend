@@ -261,11 +261,11 @@ def query():
         user_id = data['userId']
         session_id = data['sessionId']
         created_at = data['createdAt']
-
+        website = data['website']
         # Check the limits
         logs = ChatLog.get_logs_by_bot_id(bot_id=bot_id)
         user = User.get_by_userID(id=user_id)
-        sessionLimits = BillingPlan.query.filter_by(code=user.billing_plan)
+        sessionLimits = BillingPlan.query.filter_by(code=user.billing_plan).first().max_sessions_per_month
         # lang = data['lang']
         # language_codes = {
         #     10: 'English',
@@ -290,7 +290,7 @@ def query():
             chat_log.ended_at = created_at
             chat_log.save()
         else:
-            new_log = ChatLog(user_id, bot.id, session_id, created_at, created_at)
+            new_log = ChatLog(user_id, bot.id, website, session_id, created_at, created_at)
             new_log.save()
 
         return jsonify({'message': result, 'solve':solve}), 200

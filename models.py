@@ -557,13 +557,15 @@ class ChatLog(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     session_id = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.String(255), nullable=False)
+    website = db.Column(db.String(255), nullable=False, default="https://login.aiana.io")
     bot_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
     ended_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
 
-    def __init__(self, user_id,  bot_name, session_id, created_at, ended_at):
+    def __init__(self, user_id,  bot_name, website, session_id, created_at, ended_at):
         self.created_at = created_at
         self.ended_at = ended_at
+        self.website = website
         self.bot_name = bot_name
         self.user_id = user_id
         self.session_id = session_id
@@ -618,6 +620,7 @@ class ChatLog(db.Model):
             'id': self.id,
             'bot_name': self.bot_name,
             'user_id': self.user_id,
+            'website': self.website or "https://login.aiana.io",
             'session_id': self.session_id,
             'created_at': self.created_at,  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
             'ended_at': self.ended_at

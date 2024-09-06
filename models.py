@@ -29,7 +29,7 @@ class User(db.Model):
     com_country = db.Column(db.String(255), nullable=False)
     com_website = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255), nullable = False, default = 'user')
-    billing_plan = db.Column(db.String(255), nullable = False, default = 'aiana_try')
+    billing_plan = db.Column(db.String(255), nullable=False, default='aiana_try')
     last_login = db.Column(db.DateTime, nullable = True)
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
@@ -137,7 +137,6 @@ class User(db.Model):
             'com_city': self.com_city,
             'com_postal': self.com_postal,
             'com_country': self.com_country,
-            'com_website': self.com_website,
             'role': self.role,
             'created_at':self.created_at,
             'last_login':self.last_login,
@@ -231,13 +230,15 @@ class DocumentKnowledge(db.Model):
     type = db.Column(db.String(255), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
     file_size = db.Column(db.String(255), nullable=False)
+    file_size_mb = db.Column(db.Integer, nullable=False, default=0)
     unique_id = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, type, filename, file_size, unique_id):
+    def __init__(self, type, filename, file_size, file_size_mb, unique_id):
         self.type = type
         self.filename = filename
         self.file_size = file_size
+        self.file_size_mb = file_size_mb
         self.unique_id = unique_id
     
     def save(self):
@@ -265,6 +266,7 @@ class DocumentKnowledge(db.Model):
             'filename': self.filename,
             'unique_id': self.unique_id,
             'file_size':self.file_size,
+            'file_size_mb':self.file_size_mb,
             'created_at': self.created_at.isoformat()  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
         }
 

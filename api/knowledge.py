@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import jwt_required
 from flask_cors import cross_origin
-from models import DocumentKnowledge, Website, Text, KnowledgeBase, Bot
+from models import DocumentKnowledge, Website, Text, KnowledgeBase, Bot, User, BillingPlan
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import TextLoader
@@ -32,9 +32,41 @@ def upload_document():
         print("qas >>>", urls_json)
 
         unique_id = str(uuid.uuid4())
-        
-        bad_urls =[]
+        doc_storage = 0
 
+        #  Check limits
+        for file in files:
+            # Process each file (e.g., saving or using it)
+            file.save('uploads/' + file.filename)
+            file_path = 'uploads/' + file.filename
+            filename = file.filename
+            filesize_byte = os.path.getsize(file_path)/1024
+            doc_storage = doc_storage + filesize_byte / 1024
+        user = User.get_by_userID(user_id)
+        billing_plan = BillingPlan.get_by_code(user.billing_plan)
+        max_storage = billing_plan.max_storage
+        knowledge_bases = KnowledgeBase.query.filter_by(user_id=user.id).all()
+        current_storage = 0
+        for knowledge_base in knowledge_bases:
+            unique_id = knowledge_base.unique_id
+            docs = DocumentKnowledge.query.filter_by(unique_id=unique_id).all()
+            for doc in docs:
+                size = doc.file_size_mb if doc.file_size_mb is not None else 0
+                doc_storage = current_storage + size
+        print("max_storage -->", max_storage)
+        print("current_storage -->", current_storage)
+        print("doc_storage -->", doc_storage)
+        if max_storage < current_storage + doc_storage:
+            for file in files:
+                file_path = 'uploads/' + file.filename
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"Deleted file: {file_path}")
+                else:
+                    print(f"The file does not exist: {file_path}")
+            return jsonify({'error': 'Exceeds Max Storage'}), 403
+            
+        bad_urls =[]
         if urls_json:
             urls = json.loads(urls_json)
             for url in urls:
@@ -55,13 +87,12 @@ def upload_document():
                 generate_kb_from_url(chunks, unique_id, new_website.id, type_of_knowledge)
 
         for file in files:
-            # Process each file (e.g., saving or using it)
-            file.save('uploads/' + file.filename)
             file_path = 'uploads/' + file.filename
             filename = file.filename
-            filesize = os.path.getsize(file_path)/1024
-            print(filesize)
-            if filesize > 512:
+            filesize_byte = os.path.getsize(file_path)/1024
+            print(filesize_byte)
+            filesize = ''
+            if filesize_byte > 512:
                 filesize = f"{(filesize/1024):.2f} MB"
             else:
                 filesize = f"{filesize:.2f} KB"
@@ -81,10 +112,10 @@ def upload_document():
             data = loader.load()
 
             chunks = tiktoken_doc_split(data)
-            new_doc = DocumentKnowledge(filename=filename, type=extension, file_size=filesize, unique_id=unique_id)
+            new_doc = DocumentKnowledge(filename=filename, type=extension, file_size=filesize, file_size_mb=filesize_byte/1024,unique_id=unique_id)
             new_doc.save()
             generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
-            
+            doc_storage = doc_storage + filesize_byte/1024
             # After processing is done, delete the file
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -198,6 +229,42 @@ def update_knowledge_base():
         if user_id is None:
             return jsonify({"error": "Unauthorized request!"}), 405
 
+        doc_storage = 0
+
+        #  Check limits
+        for file in files:
+            # Process each file (e.g., saving or using it)
+            file.save('uploads/' + file.filename)
+            file_path = 'uploads/' + file.filename
+            filename = file.filename
+            filesize_byte = os.path.getsize(file_path)/1024
+            doc_storage = doc_storage + filesize_byte / 1024
+        user = User.get_by_userID(user_id)
+        billing_plan = BillingPlan.get_by_code(user.billing_plan)
+        max_storage = billing_plan.max_storage
+        knowledge_bases = KnowledgeBase.query.filter_by(user_id=user.id).all()
+        current_storage = 0
+        for knowledge_base in knowledge_bases:
+            unique_id = knowledge_base.unique_id
+            docs = DocumentKnowledge.query.filter_by(unique_id=unique_id).all()
+            for doc in docs:
+                print(doc.file_size_mb)
+                size = doc.file_size_mb if doc.file_size_mb else 0
+                print(size)
+                current_storage = current_storage + size
+        print("max_storage -->", max_storage)
+        print("current_storage -->", current_storage)
+        print("doc_storage -->", doc_storage)
+        if max_storage < current_storage + doc_storage:
+            for file in files:
+                file_path = 'uploads/' + file.filename
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"Deleted file: {file_path}")
+                else:
+                    print(f"The file does not exist: {file_path}")
+            return jsonify({'error': 'Exceeds Max Storage'}), 403
+
         if name:
             knowledge_base_entry.name = name
             knowledge_base_entry.save()
@@ -225,15 +292,15 @@ def update_knowledge_base():
         # Process uploaded files
         if len(files) > 0:
             for file in files:
-                file.save('uploads/' + file.filename)
                 file_path = 'uploads/' + file.filename
                 filename = file.filename
-                filesize = os.path.getsize(file_path)/1024
-                print(filesize)
-                if filesize > 512:
-                    filesize = f"{(filesize/1024):.2f} MB"
+                filesize_byte = os.path.getsize(file_path)/1024
+                # print(filesize)
+                filesize = ''
+                if filesize_byte > 512:
+                    filesize = f"{(filesize_byte/1024):.2f} MB"
                 else:
-                    filesize = f"{filesize:.2f} KB"
+                    filesize = f"{filesize_byte:.2f} KB"
                 extension = os.path.splitext(secure_filename(file.filename))[1]
                 loader = None
                 type_of_knowledge = ''
@@ -251,7 +318,7 @@ def update_knowledge_base():
                 data = loader.load()
 
                 chunks = tiktoken_doc_split(data)
-                new_doc = DocumentKnowledge(filename=filename, file_size=filesize, type=extension, unique_id=unique_id)
+                new_doc = DocumentKnowledge(filename=filename, file_size=filesize, file_size_mb=filesize_byte/1024,  type=extension, unique_id=unique_id)
                 new_doc.save()
                 generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
                 

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from werkzeug.utils import secure_filename
-from models import Bot, KnowledgeBase, Conversation, ChatLog, BillingPlan, User
+from models import Bot, KnowledgeBase, Conversation, ChatLog, BillingPlan, User, RegisteredWebsite
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from utils.provider import generate
@@ -317,6 +317,57 @@ def del_messages():
     except Exception as e:
         print(str(e))
         return jsonify({'status':'error'}), 500
-    
 
-    
+@bot_blueprint.route('/add_website', methods=['POST'])
+@jwt_required()
+def add_website():
+    try:
+        data = request.get_json()
+        user_id = data['user_id']
+        index = data['index']
+        bot_id = data['bot_id']
+        domain = data['domain']
+        # Check limitations
+
+        current_websites = RegisteredWebsite.get_by_user_id(user_id)
+        billing_plan = User.get_by_userID(user_id).billing_plan
+        plan = BillingPlan.query.filter_by(code=billing_plan).first()
+        max_linked_websites = plan.max_linked_websites
+        if len(current_websites) >= max_linked_websites:
+            return jsonify({'message':'Max websites number exceeds'}), 403
+
+        new_website = RegisteredWebsite(index=index, user_id=user_id, bot_id=bot_id, domain=domain)
+        new_website.save()
+
+        return jsonify({'message':'success'}), 201
+    except Exception as e:
+        print(str(e))
+        return jsonify({'message': 'error'}), 500
+
+@bot_blueprint.route('/remove_website', methods=['POST'])
+@jwt_required()
+def remove_website():
+    try:
+        data = request.get_json()
+        index = data['index']
+        RegisteredWebsite.del_by_index(index)
+
+        return jsonify({'message':'error'}), 201
+    except Exception as e:
+        print(str(e))
+        return jsonify({'message': 'error'}), 500
+            
+@bot_blueprint.route('/get_websites', methods=['GET'])
+@jwt_required()
+def get_websites():
+    try:
+        botId = request.args.get('botId')
+        websites = RegisteredWebsite.get_by_bot_id(bot_id=botId)
+        websites_json = []
+        for website in websites:
+            websites_json.append(website.json())
+        
+        return jsonify(websites_json)
+    except Exception as e:
+        print(str(e))
+        return jsonify({'message':'error'}), 500

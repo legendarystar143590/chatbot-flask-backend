@@ -696,12 +696,16 @@ class RegisteredWebsite(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     bot_id = db.Column(db.Integer, nullable=False, default=0)
+    user_id = db.Column(db.Integer, nullable=False, default=0)
+    index = db.Column(db.String(255), nullable=False)
     domain = db.Column(db.String(255), nullable=False, default="https://login.aiana.io")
     updated_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
 
-    def __init__(self, bot_id,  domain):
+    def __init__(self, index, bot_id, user_id,  domain):
+        self.index = index
         self.domain = domain
         self.bot_id = bot_id
+        self.user_id = user_id
     
     def save(self):
         db.session.add(self)
@@ -714,6 +718,10 @@ class RegisteredWebsite(db.Model):
     @staticmethod
     def get_by_bot_id(bot_id):
         return RegisteredWebsite.query.filter_by(bot_id=bot_id).all()
+
+    @staticmethod
+    def get_by_user_id(user_id):
+        return RegisteredWebsite.query.filter_by(user_id=user_id).all()
    
     @staticmethod
     def del_by_bot_id(bot_id):
@@ -727,9 +735,22 @@ class RegisteredWebsite(db.Model):
             db.session.rollback()
             raise e
 
+    @staticmethod
+    def del_by_index(index):
+        try:
+            website = RegisteredWebsite.query.filter_by(index=index).first()
+            db.session.delete(website)
+            db.session.commit()
+            
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
     def json(self):
         return {
             'id': self.id,
+            'index': self.index,
+            'user_id': self.user_id,
             'bot_id': self.bot_id,
             'domain': self.domain,
             'updated_at':self.updated_at
@@ -737,3 +758,4 @@ class RegisteredWebsite(db.Model):
 
     def __repr__(self):
         return f"<RegisteredWebsite {self.id}>"
+

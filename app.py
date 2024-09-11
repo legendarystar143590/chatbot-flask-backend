@@ -13,6 +13,7 @@ from api.knowledge import knowledge_blueprint
 from api.chatlog import log_blueprint
 from api.tickets import ticket_blueprint
 from api.payment import payment_blueprint
+from api.mautic import delete_mautic_contact
 from models import db, User, BillingPlan
 from datetime import timedelta
 from utils.common import get_bucket_name
@@ -64,7 +65,7 @@ def index():
    db.create_all()
    # db.drop_all()
    # del_all_records()
-   
+   delete_mautic_contact(721)
    # print('Deleted')
    return "This is APIs for CustomGPT!"
 

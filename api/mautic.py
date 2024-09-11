@@ -281,6 +281,19 @@ def mautic_reset_password(data, mauticId):
         print(e)
         return "error"
 
+def delete_mautic_contact(contactId):
+    delete_user_url = f'{MAUTIC_BASE_URL}/api/contacts/{contactId}/delete'
+    access_token = get_access_token()
+    # print("Token", access_token)
+    # Headers including the access token
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Accept': 'application/json',
+    }
+
+    result = requests.delete(delete_user_url, headers=headers)
+    print(result)
+
 def book_ticket(data, mauticId):
     try:
         payloads = {

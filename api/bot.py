@@ -262,6 +262,18 @@ def query():
         session_id = data['sessionId']
         created_at = data['createdAt']
         website = data['website']
+        print(website)
+        # Check domain
+        reg_websites = RegisteredWebsite.get_by_bot_id(bot_id)
+        def check_domain():
+            if 'https://login.aiana.io' == website:
+                return True
+            for site in reg_websites:
+                if site == website:
+                    return True
+            return False
+        if check_domain() == False:
+            return jsonify({'message':'Unregistered domain'}), 403
         # Check the limits
         chat_log = ChatLog.get_by_session(session_id)
         logs = ChatLog.get_logs_by_bot_id(bot_id=bot_id)
@@ -323,9 +335,9 @@ def del_messages():
 def add_website():
     try:
         data = request.get_json()
-        user_id = data['user_id']
+        user_id = data['userId']
         index = data['index']
-        bot_id = data['bot_id']
+        bot_id = data['botId']
         domain = data['domain']
         # Check limitations
 

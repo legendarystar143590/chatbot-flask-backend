@@ -10,7 +10,7 @@ import datetime
 from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password
 from utils.common import get_language_code
 import uuid
-
+import stripe
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -61,7 +61,7 @@ def login():
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             User.update_login(email)
             # refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
-            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'firstName':user.first_name, 'lastName':user.last_name, 'role':user.role}), 200
+            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'firstName':user.first_name, 'lastName':user.last_name, 'role':user.role, 'stripeCustomerId':user.stripe_customer_id}), 200
             # set_access_cookies(response, token)
         else:
             print("Password verification failed.")  # Additional debug information
@@ -102,10 +102,12 @@ def register():
         mauticId = create_mautic_user(data)
         if mauticId == 'error':
             return jsonify({'error': 'Invalid email!'}), 400
+        # Create a stripe customer
+        customer = stripe.Customer.create(email=email)
         # Create a new User instance
         new_user = User(first_name=first_name, last_name=last_name,index = index, email=email, password=password, mauticId=mauticId, botsActive=0,
                         language=language, com_street=com_street, com_city=com_city, com_country=com_country,
-                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website)
+                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website, stripe_customer_id=customer.id)
         
         # Attempt to register the user
         if new_user.register_user_if_not_exist():

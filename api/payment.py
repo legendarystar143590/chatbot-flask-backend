@@ -17,6 +17,10 @@ domain_url = os.environ["FRONTEND_DOMAIN"]
 stripe.api_key = stripe_keys["secret_key"]
 
 
+print(stripe_keys["secret_key"])
+print(stripe_keys["publishable_key"])
+print(stripe_keys["endpoint_secret"])
+
 # @payment_blueprint.route('/create-checkout-session', methods=['POST'])
 # def create_checkout_session():
 #     try:
@@ -53,10 +57,17 @@ def stripe_webhook():
         # Invalid signature
         print(str(e))
         return "Invalid signature", 400
-
+    print(event['type'])
     # Handle the checkout.session.completed event
     if event["type"] == "checkout.session.completed":
         print("Payment was successful.")
+
         # TODO: run some custom code here
+    
+    if event["type"] == "customer.subscription.updated":
+        print(event['data']['object'])
+        subscription = event['data']['object']
+        plan_id = subscription['items']['data'][0]['price']['product']
+        print(plan_id)
 
     return "Success", 200

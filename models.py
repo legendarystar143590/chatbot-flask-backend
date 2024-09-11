@@ -15,6 +15,7 @@ class User(db.Model):
     index = db.Column(db.String(255), nullable = False)
     first_name = db.Column(db.String(255), nullable = True)
     last_name = db.Column(db.String(255), nullable = False)
+    stripe_customer_id = db.Column(db.String(255), nullable = False)
     email = db.Column(db.String(255), unique = True, nullable = False)
     language = db.Column(db.String(255), unique = False, nullable = False)
     password = db.Column(db.String(255), nullable=False)
@@ -33,9 +34,10 @@ class User(db.Model):
     last_login = db.Column(db.DateTime, nullable = True)
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
-    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website, billing_plan):
+    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website, billing_plan, stripe_customer_id):
         self.first_name = first_name
         self.last_name = last_name
+        self.stripe_customer_id = stripe_customer_id
         self.email = email
         self.index = index
         self.password = password
@@ -124,6 +126,7 @@ class User(db.Model):
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
+            'stripe_customer_id':self.stripe_customer_id,
             'email': self.email,
             'index': self.index,
             'mauticId': self.mauticId,

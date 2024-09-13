@@ -1,0 +1,84 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  # pull_request:
+  #   branches:
+  #     - main
+
+jobs:
+  # lint:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '16'  # Specify your Node.js version
+
+  #     - name: Install dependencies
+  #       run: npm install
+  #       # working-directory: ./frontend  # Adjust according to your project structure
+
+  #     - name: Run ESLint
+  #       run: npm run lint
+  #       # working-directory: ./frontend  # Adjust according to your project structure
+
+  # test:
+  #   runs-on: ubuntu-latest
+  #   needs: lint  # Ensure linting is completed first
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '16'  # Specify your Node.js version
+
+  #     - name: Install dependencies
+  #       run: npm install
+  #       working-directory: ./frontend  # Adjust according to your project structure
+
+  #     - name: Run Tests
+  #       run: npm test
+  #       working-directory: ./frontend  # Adjust according to your project structure
+
+  deploy:
+    runs-on: ubuntu-latest
+    # needs: test  # Ensure tests are completed first
+
+    steps:
+      # - name: Checkout code
+      #   uses: actions/checkout@v3
+
+      # # - name: Set up Node.js
+      # #   uses: actions/setup-node@v3
+      # #   with:
+      # #     node-version: '20'  # Specify your Node.js version
+
+  
+      # - name: Build Next.js application
+      #   run: npm run build
+      #   # working-directory: /proaudio/ai-sample  # Adjust according to your project structure
+
+      - name: Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+        run: |
+          sudo apt-get install -y sshpass
+          sshpass -p $SERVER_PASSWORD ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
+            cd /aiana/backend/flask-backend &&
+            git pull --force --autostash &&  # Pull the latest code
+            source venv/bin/activate &&
+            pip install -r requirements.txt &&
+            pm2 restart 0  # Assuming you are using PM2 for process management
+          "

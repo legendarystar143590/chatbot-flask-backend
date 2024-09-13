@@ -56,14 +56,14 @@ def upload_document():
         print("max_storage -->", max_storage)
         print("current_storage -->", current_storage)
         print("doc_storage -->", doc_storage)
-        if max_storage < current_storage + doc_storage:
+        if max_storage < current_storage + doc_storage/1024:
             for file in files:
                 file_path = 'uploads/' + file.filename
                 if os.path.exists(file_path):
                     os.remove(file_path)
-                    print(f"Deleted file: {file_path}")
+                    # print(f"Deleted file: {file_path}")
                 else:
-                    print(f"The file does not exist: {file_path}")
+                    print("The file does not exist:")
             return jsonify({'error': 'Exceeds Max Storage'}), 403
             
         bad_urls =[]
@@ -93,9 +93,9 @@ def upload_document():
             print(filesize_byte)
             filesize = ''
             if filesize_byte > 512:
-                filesize = f"{(filesize/1024):.2f} MB"
+                filesize = f"{float(filesize_byte/1024):.2f} MB"
             else:
-                filesize = f"{filesize:.2f} KB"
+                filesize = f"{float(filesize_byte):.2f} KB"
             extension = os.path.splitext(secure_filename(file.filename))[1]
             loader = None
             
@@ -115,7 +115,7 @@ def upload_document():
             new_doc = DocumentKnowledge(filename=filename, type=extension, file_size=filesize, file_size_mb=filesize_byte/1024,unique_id=unique_id)
             new_doc.save()
             generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
-            doc_storage = doc_storage + filesize_byte/1024
+            doc_storage = float(doc_storage) + filesize_byte/1024
             # After processing is done, delete the file
             if os.path.exists(file_path):
                 os.remove(file_path)

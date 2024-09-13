@@ -88,7 +88,20 @@ def stripe_webhook():
         # print(event['data']['object'])
         subscription = event['data']['object']
         # customer_email = subscription.customer_email
-        print(subscription)
+        prod_id = subscription['plan']['product']
+        print(prod_id)
+        customer_id = subscription['customer']
+        customer = stripe.Customer.retrieve(customer_id)
+        customer_email = customer['email']
+        # print(customer_email)
+        user = User.query.filter_by(email=customer_email).first()
+        # print(user)
+        if user:
+            user.stripe_customer_id = customer_id
+            plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
+            print(plan.code)
+            user.billing_plan = plan.code
+            user.save()
         # product_id = subscription['price']['product']
         # print("Customer --->  ", customer_email)
         # print("Product --->  ", product_id)

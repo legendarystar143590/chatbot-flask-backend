@@ -32,30 +32,10 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
-# Create a new index with name
-def createIndex(index_name):
-    dimension = 3072
-    model == EMBEDDING_MODEL
-    try:
-        pc.create_index(
-            name=index_name,
-            dimension=dimension,
-            metric="cosine",
-            spec=ServerlessSpec(
-                cloud="aws",
-                region="eu-west-1"
-            )
-        )
-
-        indexmodel(index_name=index_name, model=model).save()
-    except Exception as e:
-        print("Error in createIndex()", str(e))
-        pass
-
 #  Delete an index with name
-def deleteIndex(index_name):
+def deleteIndex():
     try:
-        if index_name in pc.list_indexes().names():
+        for index_name in pc.list_indexes().names():
             pc.delete_index(index_name)
         else:
             print("There is no such an index to l")

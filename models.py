@@ -29,15 +29,17 @@ class User(db.Model):
     com_postal = db.Column(db.String(255), nullable=False)
     com_country = db.Column(db.String(255), nullable=False)
     com_website = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(255), nullable = False, default = 'user')
+    role = db.Column(db.String(255), nullable=False, default='user')
+    status = db.Column(db.String(255), nullable=False, default='active')
     billing_plan = db.Column(db.String(255), nullable=False, default='aiana_try')
     last_login = db.Column(db.DateTime, nullable = True)
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
     
-    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website, billing_plan, stripe_customer_id):
+    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website, status, billing_plan, stripe_customer_id):
         self.first_name = first_name
         self.last_name = last_name
         self.stripe_customer_id = stripe_customer_id
+        self.status = status
         self.email = email
         self.index = index
         self.password = password
@@ -126,6 +128,7 @@ class User(db.Model):
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
+            'status':self.status,
             'stripe_customer_id':self.stripe_customer_id,
             'email': self.email,
             'index': self.index,
@@ -650,13 +653,15 @@ class BillingPlan(db.Model):
     max_linked_websites = db.Column(db.Integer, nullable=False, default=1)
     max_storage = db.Column(db.Integer, nullable=False, default=50) # MB in unit
     updated_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
+    prod_id = db.Column(db.String(255), nullable=False)
 
-    def __init__(self, code,  max_parallel_bots, max_sessions_per_month, max_linked_websites, max_storage):
+    def __init__(self, code,  max_parallel_bots, max_sessions_per_month, max_linked_websites, max_storage, prod_id):
         self.max_linked_websites = max_linked_websites
         self.max_storage = max_storage
         self.max_parallel_bots = max_parallel_bots
         self.code = code
         self.max_sessions_per_month = max_sessions_per_month
+        self.prod_id = prod_id
     
     def save(self):
         db.session.add(self)
@@ -688,6 +693,7 @@ class BillingPlan(db.Model):
             'max_sessions_per_month': self.max_sessions_per_month,
             'max_linked_websites': self.max_linked_websites,  # or strftime('%Y-%m-%d %H:%M:%S') for a specific format
             'max_storage': self.max_storage,
+            'prod_id':self.prod_id,
             'updated_at':self.updated_at
         }
 

@@ -21,15 +21,15 @@ def create_mautic_user(data):
             "firstname": data["first_name"],
             "lastname": data["last_name"],
             "email": data["email"],
-            "company_name": data["com_name"],
-            "company_vat": data["com_vat"],
-            "company_street": data["com_street"],
-            "company_street_number": data["com_street_number"],
-            "company_postal_code": data["com_postal"],
-            "company_city": data["com_city"],
-            "company_country": data["com_country"],
-            "company_website_url": data["com_website"],
-            "language": data["language"],
+            "company_name": data["com_name"] or "",
+            "company_vat": data["com_vat"] or "",
+            "company_street": data["com_street"] or "",
+            "company_street_number": data["com_street_number"] or "",
+            "company_postal_code": data["com_postal"] or "",
+            "company_city": data["com_city"] or "",
+            "company_country": data["com_country"] or "",
+            "company_website_url": data["com_website"] or "",
+            "language": data["language"] or "",
             "aiana_status": "registered",
             "bots_active": 0,
             "aiana_environment": "TEST",
@@ -53,8 +53,9 @@ def create_mautic_user(data):
         response = requests.post(create_user_url, data=payload, headers=headers)
         
 
-        print(response.status_code)
-        print(response.json())
+        # print(response.status_code)
+        # print(response.json())
+        print("Done")
         if response.status_code == 201:
             print("User created successfully")
             response_data = response.json()
@@ -84,15 +85,15 @@ def update_mautic_user(data, mauticId):
             "firstname": data["first_name"],
             "lastname": data["last_name"],
             "email": data["email"],
-            "company_name": data["com_name"],
-            "company_vat": data["com_vat"],
-            "company_street": data["com_street"],
-            "company_street_number": data["com_street_number"],
-            "company_postal_code": data["com_postal"],
-            "company_city": data["com_city"],
-            "company_country": data["com_country"],
-            "company_website_url": data["com_website"],
-            "language": data["language"],
+            "company_name": data["com_name"] or "",
+            "company_vat": data["com_vat"] or "",
+            "company_street": data["com_street"] or "",
+            "company_street_number": data["com_street_number"] or "",
+            "company_postal_code": data["com_postal"] or "",
+            "company_city": data["com_city"] or "",
+            "company_country": data["com_country"] or "",
+            "company_website_url": data["com_website"] or "",
+            "language": data["language"] or "",
             "aiana_status": "registered",
             "bots_active": data["botsActive"],
             "aiana_environment": "TEST",
@@ -100,7 +101,7 @@ def update_mautic_user(data, mauticId):
         }
 
         update_user_url = f'{MAUTIC_BASE_URL}/api/contacts/{mauticId}/edit'
-        print(update_user_url)
+        # print(update_user_url)
 
         access_token = get_access_token()
         # print("Token", access_token)
@@ -113,9 +114,9 @@ def update_mautic_user(data, mauticId):
         # Sending the POST request
         response = requests.put(update_user_url, data=payload, headers=headers)
         
-        print(response.status_code)
-        print(response.json())
-        if response.status_code == 200 or response.status_code==201:
+        # print(response.status_code)
+        # print(response.json())
+        if response.status_code==201:
             print("User updated successfully")
             response_data = response.json()
             contact_id = response_data['contact']['id']

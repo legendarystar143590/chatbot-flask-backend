@@ -65,7 +65,7 @@ def index():
    db.create_all()
    # db.drop_all()
    # del_all_records()
-   delete_mautic_contact(721)
+   delete_mautic_contact(7475)
    # print('Deleted')
    return "This is APIs for CustomGPT!"
 

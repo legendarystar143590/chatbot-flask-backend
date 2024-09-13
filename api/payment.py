@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, current_app
 from dotenv import load_dotenv
 import os
 import stripe
+import json
+from models import User, BillingPlan
 
 load_dotenv()
 
@@ -38,7 +40,11 @@ print(stripe_keys["endpoint_secret"])
     
 #     except Exception as e:
 #         return jsonify(error=str(e)), 403
-    
+
+def create_customer_id(email):
+    customer = stripe.Customer.create(email=email)
+    return customer.id
+
 @payment_blueprint.route("/webhook", methods=["POST"])
 def stripe_webhook():
     payload = request.get_data(as_text=True)
@@ -57,17 +63,83 @@ def stripe_webhook():
         # Invalid signature
         print(str(e))
         return "Invalid signature", 400
-    print(event['type'])
+   
     # Handle the checkout.session.completed event
+    if event["type"] == "customer.subscription.created":
+        subscription = event['data']['object']
+        prod_id = subscription['plan']['product']
+        # print(prod_id)
+        customer_id = subscription['customer']
+        customer = stripe.Customer.retrieve(customer_id)
+        customer_email = customer['email']
+        # print(customer_email)
+        user = User.query.filter_by(email=customer_email).first()
+        # print(user)
+        if user:
+            user.stripe_customer_id = customer_id
+            plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
+            print(plan.code)
+            user.billing_plan = plan.code
+            user.save()
+        print("Subscription created")
+
     if event["type"] == "checkout.session.completed":
         print("Payment was successful.")
-
+        # print(event['data']['object'])
+        subscription = event['data']['object']
+        # customer_email = subscription.customer_email
+        print(subscription)
+        # product_id = subscription['price']['product']
+        # print("Customer --->  ", customer_email)
+        # print("Product --->  ", product_id)
         # TODO: run some custom code here
     
     if event["type"] == "customer.subscription.updated":
-        print(event['data']['object'])
+        # print(event['data']['object'])
         subscription = event['data']['object']
-        plan_id = subscription['items']['data'][0]['price']['product']
-        print(plan_id)
+        prod_id = subscription['plan']['product']
+        print(prod_id)
+        customer_id = subscription['customer']
+        customer = stripe.Customer.retrieve(customer_id)
+        customer_email = customer['email']
+        # print(customer_email)
+        user = User.query.filter_by(email=customer_email).first()
+        # print(user)
+        if user:
+            user.stripe_customer_id = customer_id
+            plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
+            print(plan.code)
+            user.billing_plan = plan.code
+            user.save()
 
+        # plan_id = subscription['items']['data'][0]['price']['product']
+        print("Updated")
+    
+    if event["type"] == "customer.subscription.paused":
+        print("Paused")
+
+    if event["type"] == "subscription_schedule.canceled":
+        print("Plan canceled!")
+    
+    if event["type"] == "invoice.payment_succeeded":
+        print("Invoice paid")
+    
+
+    # Subscription deleted
+    if event["type"] == "customer.subscription.deleted":
+        subscription = event['data']['object']
+        prod_id = subscription['plan']['product']
+        # print(prod_id)
+        customer_id = subscription['customer']
+        customer = stripe.Customer.retrieve(customer_id)
+        customer_email = customer['email']
+        # print(customer_email)
+        user = User.query.filter_by(email=customer_email).first()
+        # print(user)
+        if user:
+            user.stripe_customer_id = customer_id
+            
+            user.billing_plan = "aiana_try"
+            user.save()
+        print("Update user profile")
     return "Success", 200

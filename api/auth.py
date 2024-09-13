@@ -10,7 +10,7 @@ import datetime
 from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password
 from utils.common import get_language_code
 import uuid
-import stripe
+from api.payment import create_customer_id
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -100,14 +100,15 @@ def register():
         if User.check_user_exist(email):
             return jsonify({'error': 'User already exists'}), 409
         mauticId = create_mautic_user(data)
+        print(mauticId)
         if mauticId == 'error':
             return jsonify({'error': 'Invalid email!'}), 400
         # Create a stripe customer
-        customer = stripe.Customer.create(email=email)
+        customer_id = create_customer_id(email)
         # Create a new User instance
         new_user = User(first_name=first_name, last_name=last_name,index = index, email=email, password=password, mauticId=mauticId, botsActive=0,
                         language=language, com_street=com_street, com_city=com_city, com_country=com_country,
-                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website, stripe_customer_id=customer.id)
+                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website, stripe_customer_id=customer_id, status="active", billing_plan="aiana_try")
         
         # Attempt to register the user
         if new_user.register_user_if_not_exist():
@@ -207,14 +208,14 @@ def update_user():
         user.email = data['email']
         user.language = get_language_code(data['language'])
         # user.password = generate_password_hash(data['password'])
-        user.com_name = data['com_name']
-        user.com_vat = data['com_vat']
-        user.com_street = data['com_street']
-        user.com_city = data['com_city']
-        user.com_country = data['com_country']
-        user.com_street_number = data['com_street_number']
-        user.com_website = data['com_website']
-        user.com_postal = data['com_postal']
+        user.com_name = data['com_name']  or ""
+        user.com_vat = data['com_vat'] or ""
+        user.com_street = data['com_street'] or ""
+        user.com_city = data['com_city'] or ""
+        user.com_country = data['com_country'] or ""
+        user.com_street_number = data['com_street_number'] or ""
+        user.com_website = data['com_website'] or ""
+        user.com_postal = data['com_postal'] or ""
         data["botsActive"] = user.botsActive
         if update_mautic_user(data, user.mauticId) == 'error':
             return jsonify({'error': 'Not found user!'}), 400

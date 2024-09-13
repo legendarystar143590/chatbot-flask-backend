@@ -14,10 +14,9 @@ from api.chatlog import log_blueprint
 from api.tickets import ticket_blueprint
 from api.payment import payment_blueprint
 from api.mautic import delete_mautic_contact
-from models import db, User, BillingPlan
+from models import db
 from datetime import timedelta
 from utils.common import get_bucket_name
-from utils.vectorizor import deleteIndex
 load_dotenv()
 
 app = Flask(__name__)
@@ -68,7 +67,7 @@ def index():
    # del_all_records()
    # delete_mautic_contact(407)
    # print('Deleted')
-   deleteIndex()
+   # deleteIndex()
    return "This is APIs for CustomGPT!"
 
 if __name__ == '__main__':

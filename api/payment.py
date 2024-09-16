@@ -47,7 +47,7 @@ def create_customer_id(email):
 
 @payment_blueprint.route("/webhook", methods=["POST"])
 def stripe_webhook():
-    payload = request.get_data(as_text=True)
+    payload = request.get_data(as_text=False)
     sig_header = request.headers.get("Stripe-Signature")
     # print("payload--<", payload)
     try:
@@ -56,7 +56,7 @@ def stripe_webhook():
         )
 
     except ValueError as e:
-        # Invalid payload\
+        # Invalid payload
         print(str(e))
         return "Invalid payload", 400
     except stripe.error.SignatureVerificationError as e:
@@ -80,6 +80,7 @@ def stripe_webhook():
             plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
             print(plan.code)
             user.billing_plan = plan.code
+            user.status = 'active'
             user.save()
         print("Subscription created")
 
@@ -137,7 +138,22 @@ def stripe_webhook():
     if event["type"] == "invoice.payment_succeeded":
         print("Invoice paid")
     
+    if event["type"] == "invoice.payment_failed":
+        subscription = event['data']['object']
+        prod_id = subscription['plan']['product']
+        # print(prod_id)
+        customer_id = subscription['customer']
+        customer = stripe.Customer.retrieve(customer_id)
+        customer_email = customer['email']
+        # print(customer_email)
+        user = User.query.filter_by(email=customer_email).first()
+        # print(user)
+        if user:
+            user.stripe_customer_id = customer_id
+            user.billing_plan = "aiana_try"
+            user.save()
 
+        print("Update user profile")
     # Subscription deleted
     if event["type"] == "customer.subscription.deleted":
         subscription = event['data']['object']
@@ -153,6 +169,7 @@ def stripe_webhook():
             user.stripe_customer_id = customer_id
             
             user.billing_plan = "aiana_try"
+            user.status = 'cancel'
             user.save()
         print("Update user profile")
     return "Success", 200

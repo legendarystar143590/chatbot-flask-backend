@@ -30,7 +30,7 @@ class User(db.Model):
     com_country = db.Column(db.String(255), nullable=False)
     com_website = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255), nullable=False, default='user')
-    status = db.Column(db.String(255), nullable=False, default='active')
+    status = db.Column(db.String(255), nullable=False, default='cancel')
     billing_plan = db.Column(db.String(255), nullable=False, default='aiana_try')
     last_login = db.Column(db.DateTime, nullable = True)
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)

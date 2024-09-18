@@ -17,6 +17,9 @@ from api.mautic import delete_mautic_contact
 from models import db
 from datetime import timedelta
 from utils.common import get_bucket_name
+import cProfile
+import pstats
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -71,6 +74,17 @@ def index():
    return "This is APIs for CustomGPT!"
 
 if __name__ == '__main__':
+   # Start profiling
+   profiler = cProfile.Profile()
+   profiler.enable()
+
    app.run(debug=True)
+
+   # Stop profiling and save the results
+   profiler.disable()
+   stats = pstats.Stats(profiler).sort_stats('cumulative')
+   stats.print_stats()
+
+
    
    

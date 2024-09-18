@@ -270,12 +270,13 @@ def update_knowledge_base():
             knowledge_base_entry.save()
         bad_urls = []
         # Process URLs JSON if provided
+        print(urls_json)
         if urls_json:
             urls = json.loads(urls_json)
             for url in urls:
                 # print(url['id'])
-                if len(urls) > 0 and url['id'] != -1:
-                    continue
+                # if len(urls) > 0 and url['id'] != -1:
+                #     continue
                 
                 new_website = Website(url=url['url'], unique_id=unique_id)
                 new_website.save()

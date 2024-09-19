@@ -108,7 +108,7 @@ def register():
         # Create a new User instance
         new_user = User(first_name=first_name, last_name=last_name,index = index, email=email, password=password, mauticId=mauticId, botsActive=0,
                         language=language, com_street=com_street, com_city=com_city, com_country=com_country,
-                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website, stripe_customer_id=customer_id, status="active", billing_plan="aiana_try")
+                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website, stripe_customer_id=customer_id, status="cancel", billing_plan="aiana_try")
         
         # Attempt to register the user
         if new_user.register_user_if_not_exist():

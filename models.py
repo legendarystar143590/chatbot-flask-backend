@@ -80,7 +80,7 @@ class User(db.Model):
         db.session.commit()
     
     def check_user_exist(email):
-        db_user = User.query.filter(User.email==email).first()
+        db_user = User.query.filter_by(email==email).first()
         if db_user is None:
             return False
         else:

@@ -102,6 +102,7 @@ def stripe_webhook():
             plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
             print(plan.code)
             user.billing_plan = plan.code
+            user.status = 'active'
             user.save()
         # product_id = subscription['price']['product']
         # print("Customer --->  ", customer_email)
@@ -124,6 +125,7 @@ def stripe_webhook():
             plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
             print(plan.code)
             user.billing_plan = plan.code
+            user.status = 'active'
             user.save()
 
         # plan_id = subscription['items']['data'][0]['price']['product']

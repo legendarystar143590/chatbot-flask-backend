@@ -49,21 +49,21 @@ def create_customer_id(email):
 def stripe_webhook():
     payload = request.get_data(as_text=False)
     sig_header = request.headers.get("Stripe-Signature")
-    # print("payload--<", payload)
-    try:
+    try:        
         event = stripe.Webhook.construct_event(
             payload, sig_header, stripe_keys["endpoint_secret"]
         )
 
     except ValueError as e:
         # Invalid payload
-        print(str(e))
+        print("Payload error --- >>>",str(e))
         return "Invalid payload", 400
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
-        print(str(e))
+        print("Signature verify errors---->>",str(e))
         return "Invalid signature", 400
-   
+    
+    print("event type----->", event["type"])
     # Handle the checkout.session.completed event
     if event["type"] == "customer.subscription.created":
         subscription = event['data']['object']
@@ -113,32 +113,40 @@ def stripe_webhook():
         # print(event['data']['object'])
         subscription = event['data']['object']
         prod_id = subscription['plan']['product']
-        print(prod_id)
+        previous_attributes = event['data']['previous_attributes']
         customer_id = subscription['customer']
         customer = stripe.Customer.retrieve(customer_id)
         customer_email = customer['email']
         # print(customer_email)
         user = User.query.filter_by(email=customer_email).first()
         # print(user)
-        if user:
-            user.stripe_customer_id = customer_id
-            plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
-            print(plan.code)
-            user.billing_plan = plan.code
-            user.status = 'active'
-            user.save()
+        if user:   
+            if previous_attributes.get('cancel_at_period_end') == True or previous_attributes.get('cancel_at_period_end') == None:
+                user.stripe_customer_id = customer_id
+                plan = BillingPlan.query.filter_by(prod_id=prod_id).first()
+                print(plan.code)
+                user.billing_plan = plan.code
+                user.status = 'active'
+                user.save()
+            elif previous_attributes.get('cancel_at_period_end') == False:
+                user.stripe_customer_id = customer_id                
+                user.billing_plan = "aiana_try"
+                print(user.billing_plan)
+                user.status = 'active'
+                user.save()               
 
         # plan_id = subscription['items']['data'][0]['price']['product']
         print("Updated")
     
-    if event["type"] == "customer.subscription.paused":
-        print("Paused")
+    # if event["type"] == "customer.subscription.paused":
+    #     print("Paused")
 
-    if event["type"] == "subscription_schedule.canceled":
-        print("Plan canceled!")
+    # if event["type"] == "subscription_schedule.canceled":
+    #     print("Plan canceled!")
     
-    if event["type"] == "invoice.payment_succeeded":
-        print("Invoice paid")
+    # if event["type"] == "invoice.payment_succeeded":
+    #     print(event)
+    #     print("Invoice paid")
     
     if event["type"] == "invoice.payment_failed":
         subscription = event['data']['object']

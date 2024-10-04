@@ -18,10 +18,9 @@ user_blueprint = Blueprint('user_blueprint', __name__)
 @user_blueprint.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-
     if not data or not data['email'] or not data['password']:
         return jsonify({'message': 'Could not verify', 'WWW-Authenticate': 'Basic realm="Login required!"'}), 401
-
+        
     try:
         data = request.get_json()
         email = data['email']
@@ -36,7 +35,7 @@ def login():
         print(f"Provided password: {data['password']}")
         mautic_data = {}
         # Check if the provided password matches the stored password hash
-        if check_password_hash(user.password, password):
+        if check_password_hash(user.password, password):            
             total_bots = Bot.query.filter_by(user_id=user.id).count()
             active_bots = Bot.query.filter_by(user_id=user.id, active=1).count()
             mautic_data["language"] = user.language
@@ -55,9 +54,10 @@ def login():
             mautic_data["com_country"]=user.com_country
             mautic_data["com_website"]=user.com_website
             mautic_data["last_login"]=login_datetime
-            if login_mautic(mautic_data, user.mauticId) == 'error':
-                return jsonify({'error': 'Server is busy. Try again later!'}), 400
-                
+            # if login_mautic(mautic_data, user.mauticId) == 'error':
+            #     print("Password verification successful.")  # Additional debug information
+            #     return jsonify({'error': 'Server is busy. Try again later!'}), 400
+            
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             User.update_login(email)
             # refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
@@ -278,3 +278,10 @@ def refresh():
     current_user = get_jwt_identity()
     new_access_token = create_access_token(identity=current_user, expires_delta=datetime.timedelta(hours=1))
     return jsonify(access_token=new_access_token), 201
+
+@user_blueprint.route('/get_billing_info', methods=['POST'])
+def get_billing_info():
+    data = request.get_json()
+    email = data['email']
+    user = User.query.filter_by(email=email).first()
+    return jsonify({'plan':user.billing_plan, 'status':user.status}), 200

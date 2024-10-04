@@ -81,7 +81,7 @@ def create_mautic_user(data):
 
 def update_mautic_user(data, mauticId):
     try:
-        payload =  {
+        payload = {
             "firstname": data["first_name"],
             "lastname": data["last_name"],
             "email": data["email"],

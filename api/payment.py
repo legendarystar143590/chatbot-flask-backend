@@ -45,10 +45,46 @@ def create_customer_id(email):
     customer = stripe.Customer.create(email=email)
     return customer.id
 
+@payment_blueprint.route('/create_new_url', methods=['POST'])
+def create_new_url():
+    try:
+        data = request.get_json()
+        user = User.get_by_email(data['email'])
+        if user.stripe_customer_id:
+            customer = stripe.Customer.retrieve(user.stripe_customer_id)
+            session = stripe.billing_portal.Session.create(
+                customer=customer.id,
+                return_url="https://login.aiana.io/admin"
+            )
+            print("session---->>>>>>>>>>>>", session.url)
+            return jsonify({"sessionId":session.url}), 200
+        else:
+            customer = stripe.Customer.create(email=data['email'])
+            user.stripe_customer_id = customer.id
+            user.save()
+            session = stripe.billing_portal.Session.create(
+                customer=customer.id,
+                return_url="https://login.aiana.io/admin"
+            )
+            print("session---->>>>>>>>>>>>", session.url)
+            return jsonify({"sessionId":session.url}), 200
+    except Exception as e:
+        return jsonify(error=str(e)), 403
+
 @payment_blueprint.route("/webhook", methods=["POST"])
 def stripe_webhook():
+    # data = request.get_json()
+    # print("data---->>>>>>>>>", data)
+    # if data['email']:
+    #     customer_email = data['email']
+    #     customers = stripe.Customer.list(email=customer_email)
+    #     print("customers------------>>>>>>>>>>>>", customers['data'][0].id)
+    #     session = stripe.billing_portal.Session.create(
+    #         customer=customers['data'][0].id,
+    #         return_url="https://login.aiana.io/admin"
+    #     )
+    #     return session.url, 200
     payload = request.get_data(as_text=False)
-    print("payload----->", payload)
     sig_header = request.headers.get("Stripe-Signature")
     try:        
         event = stripe.Webhook.construct_event(

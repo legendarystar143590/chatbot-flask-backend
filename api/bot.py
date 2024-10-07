@@ -30,7 +30,7 @@ def create_bot():
         # Get user from id
         user = User.get_by_userID(user_id)
 
-        user = user.billing_plan
+        userBillingPlan = user.billing_plan
         bots = Bot.get_bots_from_user_id(user_id=user_id)
 
         # Check the limitation

@@ -40,7 +40,6 @@ def create_mautic_user(data):
         create_user_url = f'{MAUTIC_BASE_URL}/api/contacts/new'
         # print(create_user_url)
 
-
         access_token = get_access_token()
         # print("Token", access_token)
         # Headers including the access token
@@ -189,7 +188,7 @@ def get_access_token():
         print("Status Code:", response.status_code)
         print("Response Text:", response.text)
         print(response.data)
-        return resonse.status_code
+        return response.status_code
 
 def login_mautic(data, mauticId):
     try:

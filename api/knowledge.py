@@ -31,7 +31,7 @@ def upload_document():
         print("files >>>", len(files))
         print("qas >>>", urls_json)
 
-        unique_id = str(uuid.uuid4())
+        new_unique_id = str(uuid.uuid4())
         doc_storage = 0
 
         #  Check limits
@@ -49,14 +49,16 @@ def upload_document():
         current_storage = 0
         for knowledge_base in knowledge_bases:
             unique_id = knowledge_base.unique_id
+            print("unique_id -->", unique_id)
             docs = DocumentKnowledge.query.filter_by(unique_id=unique_id).all()
             for doc in docs:
                 size = doc.file_size_mb if doc.file_size_mb is not None else 0
-                doc_storage = current_storage + size
+                current_storage = current_storage + size
+        # doc_storage = doc_storage + current_storage
         print("max_storage -->", max_storage)
         print("current_storage -->", current_storage)
         print("doc_storage -->", doc_storage)
-        if max_storage < current_storage + doc_storage/1024:
+        if max_storage < current_storage + doc_storage:
             for file in files:
                 file_path = 'uploads/' + file.filename
                 if os.path.exists(file_path):
@@ -75,7 +77,7 @@ def upload_document():
                 if (text == False):
                     bad_urls.append(url["url"])
                     continue
-                new_website = Website(url=url["url"], unique_id=unique_id)
+                new_website = Website(url=url["url"], unique_id=new_unique_id)
                 new_website.save()
                 # save_from_url(new_website.id, url)
                 print(new_website.id)
@@ -84,7 +86,7 @@ def upload_document():
                 type_of_knowledge = 'url'
                 print("website >>>", chunks)
 
-                generate_kb_from_url(chunks, unique_id, new_website.id, type_of_knowledge)
+                generate_kb_from_url(chunks, new_unique_id, new_website.id, type_of_knowledge)
 
         for file in files:
             file_path = 'uploads/' + file.filename
@@ -112,9 +114,9 @@ def upload_document():
             data = loader.load()
 
             chunks = tiktoken_doc_split(data)
-            new_doc = DocumentKnowledge(filename=filename, type=extension, file_size=filesize, file_size_mb=filesize_byte/1024,unique_id=unique_id)
+            new_doc = DocumentKnowledge(filename=filename, type=extension, file_size=filesize, file_size_mb=filesize_byte/1024,unique_id=new_unique_id)
             new_doc.save()
-            generate_kb_from_document(chunks, unique_id, new_doc.id, type_of_knowledge)
+            generate_kb_from_document(chunks, new_unique_id, new_doc.id, type_of_knowledge)
             doc_storage = float(doc_storage) + filesize_byte/1024
             # After processing is done, delete the file
             if os.path.exists(file_path):
@@ -127,15 +129,15 @@ def upload_document():
         if qas_json:
             qas = json.loads(qas_json)
             for qa in qas:
-                new_qa = Text(question=qa["question"], answer=qa["answer"], unique_id=unique_id)
+                new_qa = Text(question=qa["question"], answer=qa["answer"], unique_id=new_unique_id)
                 new_qa.save()
                 text = f"Question: {qa['question']} Answer: {qa['answer']}"
                 chunks = tiktoken_text_split(text)
                 type_of_knowledge = 'qa'
-                generate_kb_from_url(chunks, unique_id, new_qa.id, type_of_knowledge)
+                generate_kb_from_url(chunks, new_unique_id, new_qa.id, type_of_knowledge)
 
                 print("QA ID>>>", new_qa.id)
-        new_knowledge = KnowledgeBase(name=name, unique_id=unique_id, user_id=user_id)
+        new_knowledge = KnowledgeBase(name=name, unique_id=new_unique_id, user_id=user_id)
         new_knowledge.save()
         url_res = len(bad_urls)==0
         return {'status': 'success', 'message': f'Received {len(files)} files with name {name}', 'bad_url':url_res}

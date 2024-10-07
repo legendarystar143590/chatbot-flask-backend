@@ -48,6 +48,7 @@ def create_customer_id(email):
 @payment_blueprint.route("/webhook", methods=["POST"])
 def stripe_webhook():
     payload = request.get_data(as_text=False)
+    print("payload----->", payload)
     sig_header = request.headers.get("Stripe-Signature")
     try:        
         event = stripe.Webhook.construct_event(

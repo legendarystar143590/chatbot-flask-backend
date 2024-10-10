@@ -56,7 +56,6 @@ def create_new_url():
                 customer=customer.id,
                 return_url="https://login.aiana.io/admin"
             )
-            print("session---->>>>>>>>>>>>", session.url)
             return jsonify({"sessionId":session.url}), 200
         else:
             customer = stripe.Customer.create(email=data['email'])
@@ -66,24 +65,12 @@ def create_new_url():
                 customer=customer.id,
                 return_url="https://login.aiana.io/admin"
             )
-            print("session---->>>>>>>>>>>>", session.url)
             return jsonify({"sessionId":session.url}), 200
     except Exception as e:
         return jsonify(error=str(e)), 403
 
 @payment_blueprint.route("/webhook", methods=["POST"])
 def stripe_webhook():
-    # data = request.get_json()
-    # print("data---->>>>>>>>>", data)
-    # if data['email']:
-    #     customer_email = data['email']
-    #     customers = stripe.Customer.list(email=customer_email)
-    #     print("customers------------>>>>>>>>>>>>", customers['data'][0].id)
-    #     session = stripe.billing_portal.Session.create(
-    #         customer=customers['data'][0].id,
-    #         return_url="https://login.aiana.io/admin"
-    #     )
-    #     return session.url, 200
     payload = request.get_data(as_text=False)
     sig_header = request.headers.get("Stripe-Signature")
     try:        
@@ -93,13 +80,10 @@ def stripe_webhook():
 
     except ValueError as e:
         # Invalid payload
-        print("Payload error --- >>>",str(e))
         return "Invalid payload", 400
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
-        print("Signature verify errors---->>",str(e))
         return "Invalid signature", 400
-    
     print("event type----->", event["type"])
     # Handle the checkout.session.completed event
     if event["type"] == "customer.subscription.created":

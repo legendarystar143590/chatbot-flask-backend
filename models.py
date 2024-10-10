@@ -143,6 +143,7 @@ class User(db.Model):
             'com_city': self.com_city,
             'com_postal': self.com_postal,
             'com_country': self.com_country,
+            'com_website': self.com_website,
             'role': self.role,
             'created_at':self.created_at,
             'last_login':self.last_login,

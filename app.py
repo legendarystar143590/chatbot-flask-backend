@@ -68,7 +68,7 @@ def index():
    db.create_all()
    # db.drop_all()
    # del_all_records()
-   for i in range(7477, 7639):
+   for i in range(7714, 9616):
       delete_mautic_contact(i)
    # print('Deleted')
    # deleteIndex()

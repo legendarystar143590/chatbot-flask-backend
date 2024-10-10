@@ -22,7 +22,6 @@ def login():
         return jsonify({'message': 'Could not verify', 'WWW-Authenticate': 'Basic realm="Login required!"'}), 401
         
     try:
-        data = request.get_json()
         email = data['email']
         password = data['password']
         user = User.query.filter_by(email=email).first()
@@ -54,9 +53,9 @@ def login():
             mautic_data["com_country"]=user.com_country
             mautic_data["com_website"]=user.com_website
             mautic_data["last_login"]=login_datetime
-            # if login_mautic(mautic_data, user.mauticId) == 'error':
-            #     print("Password verification successful.")  # Additional debug information
-            #     return jsonify({'error': 'Server is busy. Try again later!'}), 400
+            if login_mautic(mautic_data, user.mauticId) == 'error':
+                print("Password verification successful.")  # Additional debug information
+                return jsonify({'error': 'Server is busy. Try again later!'}), 400
             
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             User.update_login(email)

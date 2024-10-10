@@ -15,6 +15,21 @@ language_dict = {
     'fr': 5
 }
 
+def get_mautic_user_by_email(email):
+    search_url = f'{MAUTIC_BASE_URL}/api/contacts?search={email}'
+    access_token = get_access_token()
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Accept': 'application/json',
+    }
+    response = requests.get(search_url, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+        if data['total'] != '0':
+            return data['contacts'][0]
+    return None
+
 def create_mautic_user(data):
     try:
         payload =  {
@@ -83,7 +98,7 @@ def update_mautic_user(data, mauticId):
         payload = {
             "firstname": data["first_name"],
             "lastname": data["last_name"],
-            "email": data["email"],
+            # "email": data["email"],
             "company_name": data["com_name"] or "",
             "company_vat": data["com_vat"] or "",
             "company_street": data["com_street"] or "",
@@ -111,11 +126,11 @@ def update_mautic_user(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.put(update_user_url, data=payload, headers=headers)
-        
-        # print(response.status_code)
+        payload_json = json.dumps(payload)
+        response = requests.patch(update_user_url, data=payload_json, headers=headers)
+        print(response.status_code)
         # print(response.json())
-        if response.status_code==201:
+        if response.status_code==201 or response.status_code==200:
             print("User updated successfully")
             response_data = response.json()
             contact_id = response_data['contact']['id']
@@ -128,7 +143,7 @@ def update_mautic_user(data, mauticId):
         print(e)
         return "error"
 
-def update_bot_number(number):
+def update_bot_number(number, mauticId):
     try:
         payload =  {
             "bots_active": number,
@@ -200,7 +215,7 @@ def login_mautic(data, mauticId):
             "bots_registered": data["bots_registered"],
             "firstname": data["first_name"],
             "lastname": data["last_name"],
-            "email": data["email"],
+            # "email": data["email"],
             "company_name": data["com_name"],
             "company_vat": data["com_vat"],
             "company_street": data["com_street"],
@@ -228,10 +243,10 @@ def login_mautic(data, mauticId):
         }
 
         # Sending the POST request
-        response = requests.put(update_user_url, data=payload, headers=headers)
+        response = requests.patch(update_user_url, data=payload, headers=headers)
         
-        print(response)
-        if response.status_code == 200:
+        print(response.json())
+        if response.status_code == 200 or response.status_code == 201:
             print("User updated successfully")
             response_data = response.json()
             contact_id = response_data['contact']['id']

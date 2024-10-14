@@ -245,7 +245,6 @@ def login_mautic(data, mauticId):
         # Sending the POST request
         response = requests.patch(update_user_url, data=payload, headers=headers)
         
-        print(response.json())
         if response.status_code == 200 or response.status_code == 201:
             print("User updated successfully")
             response_data = response.json()
@@ -286,6 +285,43 @@ def mautic_reset_password(data, mauticId):
         print(response.status_code)
         if response.status_code == 200:
             print("Sent password reset mail successfully")
+            response_data = response.json()
+            # Checking response
+            return response_data['success']
+        else:
+            return 'error'
+        
+    except Exception as e:
+        print(e)
+        return "error"
+
+def mautic_send_verfication_link(data, mauticId):
+    try:
+        link = data['verification_link']
+        payload = {
+            "tokens": {
+                "{password_reset_link}": link
+            }
+        }
+        payload_string = json.dumps(payload)
+        update_user_url = f'{MAUTIC_BASE_URL}/api/emails/2/contact/{mauticId}/send'
+        # print(update_user_url)
+
+        access_token = get_access_token()
+        # print("Token", access_token)
+        # Headers including the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+
+        # Sending the POST request
+        response = requests.post(update_user_url, data=payload_string, headers=headers)
+        
+        print(response.status_code)
+        if response.status_code == 200:
+            print("Sent email verification link mail successfully")
             response_data = response.json()
             # Checking response
             return response_data['success']

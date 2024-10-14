@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import  create_access_token, create_refresh_token,  jwt_required, get_jwt_identity, set_access_cookies
+from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
@@ -7,10 +8,12 @@ from models import User, Bot
 import logging
 import hashlib
 import datetime
-from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password
+from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password, mautic_send_verfication_link
 from utils.common import get_language_code
 import uuid
 from api.payment import create_customer_id
+import secrets
+from utils.common import send_verification_link
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -60,7 +63,7 @@ def login():
             access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
             User.update_login(email)
             # refresh_token = create_refresh_token(identity=user.id, expires_delta=datetime.timedelta(hours=2))
-            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'firstName':user.first_name, 'lastName':user.last_name, 'role':user.role, 'plan':user.billing_plan, 'status':user.status}), 200
+            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'firstName':user.first_name, 'lastName':user.last_name, 'role':user.role, 'plan':user.billing_plan, 'status':user.status, 'isVerified':user.isVerified}), 200
             # set_access_cookies(response, token)
         else:
             print("Password verification failed.")  # Additional debug information
@@ -95,6 +98,7 @@ def register():
         com_postal = data['com_postal']
         com_website = data['com_website']
         data['language'] = language
+        verification_token = ''
         index = str(uuid.uuid4())
         if User.check_user_exist(email):
             return jsonify({'error': 'User already exists'}), 409
@@ -104,15 +108,21 @@ def register():
             return jsonify({'error': 'Invalid email!'}), 400
         # Create a stripe customer
         customer_id = create_customer_id(email)
+        # verification_token = secrets.token_hex(16)
         # Create a new User instance
         new_user = User(first_name=first_name, last_name=last_name,index = index, email=email, password=password, mauticId=mauticId, botsActive=0,
                         language=language, com_street=com_street, com_city=com_city, com_country=com_country,
-                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website, stripe_customer_id=customer_id, status="cancel", billing_plan="aiana_try")
+                        com_name=com_name, com_vat=com_vat, com_street_number=com_street_number, com_postal= com_postal, com_website=com_website, stripe_customer_id=customer_id, status="cancel", billing_plan="aiana_try", isVerified=False, verification_token=verification_token)
         
         # Attempt to register the user
         if new_user.register_user_if_not_exist():
             print("Starting...")
-            return jsonify({'message': 'User registered successfully'}), 201
+            serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
+            verification_token = serializer.dumps(email, salt='email-confirm')
+            verification_link = f"http://login.aiana.io/signup/verify-email?token={verification_token}"
+            User.save_verification_token(email, verification_token)
+            mautic_send_verfication_link(verification_link, mauticId)
+            return jsonify({'message': 'User registered successfully', 'email':email}), 201
         else:
             return jsonify({'error': 'User already exists'}), 409
 
@@ -247,6 +257,27 @@ def forgot_password():
     else:
         return jsonify({'message': 'Error sending email!'}), 500
 
+@user_blueprint.route('/send_verification_link', methods=['POST'])
+@cross_origin()
+def send_link():
+    data = request.get_json()
+    email = data['email']
+    user = User.get_by_email(email)
+
+    if not user:
+        print("User not found")
+        return 'User not found', 404
+    
+    serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
+    verification_token = serializer.dumps(email, salt='email-confirm')
+    verification_link = f'https://login.aiana.io/signup/verify-email?token={verification_token}'
+    data['verification_link'] = verification_link
+    if mautic_send_verfication_link(data, user.mauticId) == 1:
+        User.save_verification_token(email, verification_token)
+        return jsonify({'message': 'New verification email is successfully sent. Please, check your email...'}), 200
+    else:
+        return jsonify({'message': 'Sending error'}), 500
+
 @user_blueprint.route('/reset_with_token', methods = ['GET', 'POST'])
 def reset_with_token():
     data = request.get_json()
@@ -283,4 +314,21 @@ def get_billing_info():
     data = request.get_json()
     email = data['email']
     user = User.query.filter_by(email=email).first()
-    return jsonify({'plan':user.billing_plan, 'status':user.status}), 200
+    return jsonify({'plan':user.billing_plan, 'status':user.status, 'isVerified': user.isVerified}), 200
+
+
+@user_blueprint.route('/verify_email', methods=['GET','POST'])
+def verify_email():
+    data = request.get_json()
+    print("verify_token",data['token'])
+    token = data['token']
+    serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
+    email = serializer.loads(token, salt='email-confirm', max_age=3600)
+    user = User.query.filter_by(verification_token=token).first()
+    if user.email == email:
+        user.isVerified = True
+        user.verification_token = None
+        user.save()
+        access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
+        return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'firstName':user.first_name, 'lastName':user.last_name, 'role':user.role, 'plan':user.billing_plan, 'status':user.status, 'isVerified':user.isVerified}), 200
+    return jsonify({'error': 'Invalid verification token'}), 400

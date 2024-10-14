@@ -34,8 +34,9 @@ class User(db.Model):
     billing_plan = db.Column(db.String(255), nullable=False, default='aiana_try')
     last_login = db.Column(db.DateTime, nullable = True)
     created_at = db.Column(db.DateTime, nullable = False,  default=datetime.utcnow)
-    
-    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website, status, billing_plan, stripe_customer_id):
+    isVerified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(100))    
+    def __init__(self, first_name, last_name, index, email, password, mauticId, botsActive, language, com_name, com_vat, com_street, com_street_number, com_city, com_postal, com_country, com_website, status, billing_plan, stripe_customer_id, isVerified, verification_token):
         self.first_name = first_name
         self.last_name = last_name
         self.stripe_customer_id = stripe_customer_id
@@ -55,6 +56,8 @@ class User(db.Model):
         self.com_country = com_country
         self.com_website = com_website
         self.billing_plan = billing_plan
+        self.isVerified = isVerified
+        self.verification_token = verification_token
     
     # Add an index to the id column
     __table_args__ = (
@@ -89,6 +92,11 @@ class User(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def save_verification_token(email, verification_token):
+        user = User.query.filter_by(email=email).first()
+        user.verification_token=verification_token
+        db.session.commit() 
 
     @staticmethod
     def get_by_userID(id):        
@@ -148,6 +156,8 @@ class User(db.Model):
             'created_at':self.created_at,
             'last_login':self.last_login,
             'billing_plan':self.billing_plan,
+            'isVerified':self.isVerified,
+            'verification_token':self.verification_token,
         }
 
     def __repr__(self):

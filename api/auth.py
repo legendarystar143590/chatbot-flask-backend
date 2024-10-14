@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import  create_access_token, create_refresh_token,  jwt_required, get_jwt_identity, set_access_cookies
-from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
@@ -13,7 +12,6 @@ from utils.common import get_language_code
 import uuid
 from api.payment import create_customer_id
 import secrets
-from utils.common import send_verification_link
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)

@@ -7,10 +7,12 @@ __pycache__
 .env
 .venv 
 env/ 
-venv/ 
+venv/
+vevn/ 
 ENV/ 
 env.bak/ 
-venv.bak/ 
+venv.bak/
+vevn.bak/ 
 .gitignore
 
 ca-certificate.crt

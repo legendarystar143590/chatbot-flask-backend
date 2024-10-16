@@ -140,7 +140,9 @@ def upload_document():
         new_knowledge = KnowledgeBase(name=name, unique_id=new_unique_id, user_id=user_id)
         new_knowledge.save()
         url_res = len(bad_urls)==0
-        return {'status': 'success', 'message': f'Received {len(files)} files with name {name}', 'bad_url':url_res}
+        new_knowledge_base = KnowledgeBase.query.filter_by(unique_id=new_unique_id).first()
+        new_base_id = new_knowledge_base.id
+        return {'status': 'success', 'message': f'Received {len(files)} files with name {name}', 'bad_url':url_res, 'base_id':new_base_id}
     except Exception as e:
         print(str(e))
         return jsonify({'error': 'Error saving database!'}), 500
@@ -377,6 +379,20 @@ def del_website():
         return jsonify({'status': 'success'}), 201
     else:
         return jsonify({'status': 'error'}), 500
+
+@knowledge_blueprint.route('/del_text', methods=['POST'])
+@jwt_required()       
+def del_text():
+    data = request.get_json()
+    qu_id = data["id"]
+    if not qu_id:
+        return jsonify({'status': 'error'}), 500
+    text = Text.get_by_id(qu_id)
+    if delDocument(text.unique_id, text.id, "text"):
+        Text.del_by_id(qu_id)
+        return jsonify({'status': 'success'}), 201
+    else:
+        return jsonify({'status':'error'}), 500
         
 @knowledge_blueprint.route('/del_knowledgebase', methods=['POST'])
 @jwt_required()       

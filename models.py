@@ -785,51 +785,51 @@ class RegisteredWebsite(db.Model):
     def __repr__(self):
         return f"<RegisteredWebsite {self.id}>"
 
-# class ShopInfo(db.Model):
-#     __tablename__="shop_info"
+class ShopInfo(db.Model):
+    __tablename__="shop_info"
 
-#     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-#     shop = db.Column(db.String(255), nullable=False)
-#     state = db.Column(db.String(255), nullable=False)
-#     code = db.Column(db.String(255), nullable=True)
-#     time_stamp = db.Column(db.String(255), nullable=True)
-#     hmac_header = db.Column(db.String(255), nullable=True)
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    shop = db.Column(db.String(255), nullable=False)
+    state = db.Column(db.String(255), nullable=False)
+    code = db.Column(db.String(255), nullable=True)
+    time_stamp = db.Column(db.String(255), nullable=True)
+    hmac_header = db.Column(db.String(255), nullable=True)
 
-#     def __init__(self, shop, state, code):
-#         self.shop = shop
-#         self.state = state
-#         self.code = code
+    def __init__(self, shop, state, code):
+        self.shop = shop
+        self.state = state
+        self.code = code
 
-#     def save(self):
-#         db.session.add(self)
-#         db.session.commit()
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
-#     def update_shop_info(shop, code):
-#         db_shop = ShopInfo.query.filter_by(shop = shop).first()
-#         db_shop.code = code
-#         db.session.commit()
+    def update_shop_info(shop, code):
+        db_shop = ShopInfo.query.filter_by(shop = shop).first()
+        db_shop.code = code
+        db.session.commit()
 
-#     @staticmethod
-#     def check_shop_exist(shop):
-#         db_shop = ShopInfo.query.filter_by(shop = shop).first()
-#         if db_shop is None:
-#             return False
-#         return True
+    @staticmethod
+    def check_shop_exist(shop):
+        db_shop = ShopInfo.query.filter_by(shop = shop).first()
+        if db_shop is None:
+            return False
+        return True
     
-#     @staticmethod
-#     def get_by_shop(shop):
-#         db_shop = ShopInfo.query.filter_by(shop = shop).first()
-#         return db_shop
+    @staticmethod
+    def get_by_shop(shop):
+        db_shop = ShopInfo.query.filter_by(shop = shop).first()
+        return db_shop
 
-#     def json(self):
-#         return{
-#             'id' :self.id,
-#             'shop':self.shop,
-#             'state':self.state,
-#             'code':self.code,
-#             'time_stamp':self.time_stamp,
-#             'hmac_header':self.hmac_header
-#         }
+    def json(self):
+        return{
+            'id' :self.id,
+            'shop':self.shop,
+            'state':self.state,
+            'code':self.code,
+            'time_stamp':self.time_stamp,
+            'hmac_header':self.hmac_header
+        }
     
-#     def __repr__(self):
-#         return f"<ShopInfo {self.id}>"
+    def __repr__(self):
+        return f"<ShopInfo {self.id}>"

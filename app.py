@@ -13,7 +13,7 @@ from api.knowledge import knowledge_blueprint
 from api.chatlog import log_blueprint
 from api.tickets import ticket_blueprint
 from api.payment import payment_blueprint
-# from api.shopify import shopify_blueprint
+from api.shopify import shopify_blueprint
 from api.mautic import delete_mautic_contact
 from models import db
 from datetime import timedelta
@@ -61,7 +61,7 @@ app.register_blueprint(bot_blueprint, url_prefix='/api')
 app.register_blueprint(knowledge_blueprint, url_prefix='/api')
 app.register_blueprint(log_blueprint, url_prefix='/api')
 app.register_blueprint(ticket_blueprint, url_prefix='/api')
-# app.register_blueprint(shopify_blueprint, url_prefix='/api')
+app.register_blueprint(shopify_blueprint, url_prefix='/api')
 app.register_blueprint(payment_blueprint)
 
 get_bucket_name()

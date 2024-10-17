@@ -8,11 +8,9 @@ __pycache__
 .venv 
 env/ 
 venv/
-vevn/ 
 ENV/ 
 env.bak/ 
 venv.bak/
-vevn.bak/ 
 .gitignore
 
 ca-certificate.crt

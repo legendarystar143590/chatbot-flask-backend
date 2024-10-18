@@ -196,6 +196,6 @@ def sync_products():
         for product in products:
             intert_product_data(product, shop.id)
 
-while True:
-    sync_products()
-    time.sleep(3600)
+# while True:
+#     sync_products()
+#     time.sleep(3600)

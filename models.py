@@ -792,6 +792,7 @@ class ShopInfo(db.Model):
     shop = db.Column(db.String(255), nullable=False)
     state = db.Column(db.String(255), nullable=False)
     code = db.Column(db.String(255), nullable=True)
+    access_token = db.Column(db.String(255), nullable=True)
     time_stamp = db.Column(db.String(255), nullable=True)
     hmac_header = db.Column(db.String(255), nullable=True)
 
@@ -804,9 +805,10 @@ class ShopInfo(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def update_shop_info(shop, code):
+    def update_shop_info(shop, code, access_token):
         db_shop = ShopInfo.query.filter_by(shop = shop).first()
         db_shop.code = code
+        db_shop.access_token = access_token
         db.session.commit()
 
     @staticmethod
@@ -827,9 +829,57 @@ class ShopInfo(db.Model):
             'shop':self.shop,
             'state':self.state,
             'code':self.code,
+            'access_token':self.access_token,
             'time_stamp':self.time_stamp,
             'hmac_header':self.hmac_header
         }
     
     def __repr__(self):
         return f"<ShopInfo {self.id}>"
+    
+class ProudctsTable(db.Model):
+    __tablename__="shop_products"
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    shop_id = db.Column(db.String(255), nullable=False)
+    product_id = db.Column(db.String(255), nullable=False)
+    product_type = db.Column(db.String(255), nullable=False)
+    product_title = db.Column(db.String(255), nullable=False)
+    product_price = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.String(255), nullable=True)
+    
+    def __init__(self, shop_id, product_id, product_type, product_title, product_price,):
+        self.shop_id = shop_id
+        self.product_id = product_id
+        self.product_type = product_type
+        self.product_title = product_title
+        self.product_price = product_price
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_shop_id(shop_id):
+        return ProudctsTable.query.filter_by(shop_id=shop_id).all()
+    
+    @staticmethod
+    def clear_all_products():
+        db.session.query(ProudctsTable).delete()
+        db.session.commit()
+
+    def json(self):
+        return{
+            'id' :self.id,
+            'shop_id':self.shop_id,
+            'product_id':self.product_id,
+            'product_type':self.product_type,
+            'product_title':self.product_title,
+            'product_price':self.product_price,
+            'created_at':self.created_at,
+            'updated_at':self.updated_at
+        }
+
+    def __repr__(self):
+        return f"<ProudctsTable {self.id}>"

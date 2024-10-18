@@ -1,7 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import current_app
 from sqlalchemy.sql import func
-from sqlalchemy import and_, not_
+from sqlalchemy import and_, not_, Numeric
+from decimal import Decimal
 from datetime import datetime
 from uuid import uuid4
 from utils.common import get_language_name
@@ -845,7 +846,7 @@ class ProudctsTable(db.Model):
     product_id = db.Column(db.String(255), nullable=False)
     product_type = db.Column(db.String(255), nullable=False)
     product_title = db.Column(db.String(255), nullable=False)
-    product_price = db.Column(db.String(255), nullable=False)
+    product_price = db.Column(db.Numeric(10,2), nullable=False)
     created_at = db.Column(db.String(255), nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.String(255), nullable=True)
     
@@ -854,7 +855,7 @@ class ProudctsTable(db.Model):
         self.product_id = product_id
         self.product_type = product_type
         self.product_title = product_title
-        self.product_price = product_price
+        self.product_price = Decimal(product_price)
 
     def save(self):
         db.session.add(self)

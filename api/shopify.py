@@ -186,7 +186,7 @@ def sync_products():
     """
     # Implement your logic to synchronize products from Shopify to the database
     # This is a placeholder and should be replaced with actual API calls
-    ProudctsTable.clear_products_table()
+    ProudctsTable.clear_all_products()
     shops = ShopInfo.query.all()
     for shop in shops:
         access_token = shop.access_token

@@ -82,6 +82,7 @@ def index():
    # del_all_records()
    # for i in range(7714, 9616):
    #    delete_mautic_contact(i)
+   #    print("current number", i)
    # print('Deleted')
    # deleteIndex()
    return "This is APIs for CustomGPT!"

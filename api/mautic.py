@@ -73,7 +73,6 @@ def create_mautic_user(data):
         if response.status_code == 201:
             print("User created successfully")
             response_data = response.json()
-            print(response_data)
             contact_id = response_data['contact']['id']
             # Checking response
             print("Here is contact id", contact_id)
@@ -300,11 +299,11 @@ def mautic_send_verfication_link(data, mauticId):
         link = data['verification_link']
         payload = {
             "tokens": {
-                "{password_reset_link}": link
+                "{email_verification_url}": link
             }
         }
         payload_string = json.dumps(payload)
-        update_user_url = f'{MAUTIC_BASE_URL}/api/emails/2/contact/{mauticId}/send'
+        update_user_url = f'{MAUTIC_BASE_URL}/api/emails/9/contact/{mauticId}/send'
         # print(update_user_url)
 
         access_token = get_access_token()

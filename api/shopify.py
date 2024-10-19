@@ -6,7 +6,6 @@ import hmac
 import hashlib
 import base64
 import os
-import time
 from models import ShopInfo, ProudctsTable, User, Bot
 
 load_dotenv()
@@ -186,16 +185,14 @@ def sync_products():
     """
     # Implement your logic to synchronize products from Shopify to the database
     # This is a placeholder and should be replaced with actual API calls
-    ProudctsTable.clear_all_products()
-    shops = ShopInfo.query.all()
-    for shop in shops:
-        access_token = shop.access_token
-        if access_token == '':
-            continue
-        products = get_shopify_products(shop.shop, access_token)
-        for product in products:
-            intert_product_data(product, shop.id)
-
-# while True:
-#     sync_products()
-#     time.sleep(3600)
+    with current_app.app_context():
+        ProudctsTable.clear_all_products()
+        shops = ShopInfo.query.all()
+        print("sync_products()", shops)
+        for shop in shops:
+            access_token = shop.access_token
+            if access_token == '':
+                continue
+            products = get_shopify_products(shop.shop, access_token)
+            for product in products:
+                intert_product_data(product, shop.id)

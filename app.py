@@ -4,6 +4,7 @@ import time
 import pymysql
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, make_response
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -13,7 +14,7 @@ from api.knowledge import knowledge_blueprint
 from api.chatlog import log_blueprint
 from api.tickets import ticket_blueprint
 from api.payment import payment_blueprint
-from api.shopify import shopify_blueprint
+from api.shopify import shopify_blueprint, sync_products
 from api.mautic import delete_mautic_contact
 from models import db
 from datetime import timedelta
@@ -41,6 +42,7 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'legendarystar2160187@gmail.com'
 app.config['MAIL_PASSWORD'] = 'pksv wzbh wahl atbw'
+app.config['SCHEDULER_API_ENABLED'] = True
 
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=3)
@@ -53,6 +55,14 @@ jwt = JWTManager(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+def scheduled_task():
+   with app.app_context():
+      sync_products()
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=scheduled_task, trigger="interval", minutes=60)
+scheduler.start()
 # CORS(app, supports_credentials=True, origins=['https://your-frontend-domain.com'])
 CORS(app)
 

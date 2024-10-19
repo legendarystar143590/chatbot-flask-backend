@@ -3,6 +3,7 @@ from flask_jwt_extended import  create_access_token, create_refresh_token,  jwt_
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_cors import cross_origin
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from validate_email import validate_email
 from models import User, Bot
 import logging
 import hashlib
@@ -21,7 +22,7 @@ def login():
     data = request.get_json()
     if not data or not data['email'] or not data['password']:
         return jsonify({'message': 'Could not verify', 'WWW-Authenticate': 'Basic realm="Login required!"'}), 401
-        
+
     try:
         email = data['email']
         password = data['password']
@@ -71,6 +72,7 @@ def login():
         logging.error(f"Login error: {e}")  # Use logging for errors
         return jsonify({'error': str(e)}), 500
 
+
 @user_blueprint.route('/register', methods=['POST'])
 @cross_origin()
 def register():
@@ -78,6 +80,11 @@ def register():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
+    email = data['email']
+    is_valid = validate_email(email)
+    print (is_valid)
+    if is_valid==False:
+        return jsonify({'error':'Invalid email!'}),203
     try:
         # User Info
         first_name = data['first_name']
@@ -315,13 +322,13 @@ def get_billing_info():
     return jsonify({'plan':user.billing_plan, 'status':user.status, 'isVerified': user.isVerified}), 200
 
 
-@user_blueprint.route('/verify_email', methods=['GET','POST'])
-def verify_email():
+@user_blueprint.route('/email_verification', methods=['GET','POST'])
+def email_verification():
     data = request.get_json()
     print("verify_token",data['token'])
     token = data['token']
     serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
-    email = serializer.loads(token, salt='email-confirm', max_age=3600)
+    email = serializer.loads(token, salt='email-confirm', max_age=300)
     user = User.query.filter_by(verification_token=token).first()
     if user.email == email:
         user.isVerified = True

@@ -76,15 +76,7 @@ def create_mautic_user(data):
             contact_id = response_data['contact']['id']
             # Checking response
             print("Here is contact id", contact_id)
-            registration_url = f'{MAUTIC_BASE_URL}/api/emails/{language_dict[data["language"]]}/contact/{contact_id}/send'
-            print(registration_url)
-            registration = requests.post(registration_url, headers=headers)
-            registration = registration.json()
-            if registration['success']:
-                print(registration['success'])
-                return contact_id
-            else:
-                return 'error'
+            return contact_id            
         else:
             return 'error'
         
@@ -294,9 +286,9 @@ def mautic_reset_password(data, mauticId):
         print(e)
         return "error"
 
-def mautic_send_verfication_link(data, mauticId):
+def mautic_send_verfication_link(verification_link, mauticId):
     try:
-        link = data['verification_link']
+        link = verification_link
         payload = {
             "tokens": {
                 "{email_verification_url}": link
@@ -327,6 +319,23 @@ def mautic_send_verfication_link(data, mauticId):
         else:
             return 'error'
         
+    except Exception as e:
+        print(e)
+        return "error"
+
+def send_registration_mail(data, mauticId):
+    try:
+        access_token = get_access_token()
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Accept': 'application/json',
+        }
+        registration_url = f'{MAUTIC_BASE_URL}/api/emails/{language_dict[data]}/contact/{mauticId}/send'
+        print(registration_url)
+        registration = requests.post(registration_url, headers=headers)
+        registration = registration.json()
+        if registration['success']:
+            print(registration['success'])
     except Exception as e:
         print(e)
         return "error"

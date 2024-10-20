@@ -8,7 +8,7 @@ from models import User, Bot
 import logging
 import hashlib
 import datetime
-from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password, mautic_send_verfication_link
+from api.mautic import get_access_token, create_mautic_user, update_mautic_user, login_mautic, mautic_reset_password, mautic_send_verfication_link, send_registration_mail
 from utils.common import get_language_code
 import uuid
 from api.payment import create_customer_id
@@ -276,8 +276,7 @@ def send_link():
     serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
     verification_token = serializer.dumps(email, salt='email-confirm')
     verification_link = f'https://login.aiana.io/signup/verify-email?token={verification_token}'
-    data['verification_link'] = verification_link
-    if mautic_send_verfication_link(data, user.mauticId) == 1:
+    if mautic_send_verfication_link(verification_link, user.mauticId) == 1:
         User.save_verification_token(email, verification_token)
         return jsonify({'message': 'New verification email is successfully sent. Please, check your email...'}), 200
     else:
@@ -324,16 +323,21 @@ def get_billing_info():
 
 @user_blueprint.route('/email_verification', methods=['GET','POST'])
 def email_verification():
-    data = request.get_json()
-    print("verify_token",data['token'])
-    token = data['token']
-    serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
-    email = serializer.loads(token, salt='email-confirm', max_age=300)
-    user = User.query.filter_by(verification_token=token).first()
-    if user.email == email:
-        user.isVerified = True
-        user.verification_token = None
-        user.save()
-        access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
-        return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'firstName':user.first_name, 'lastName':user.last_name, 'role':user.role, 'plan':user.billing_plan, 'status':user.status, 'isVerified':user.isVerified}), 200
-    return jsonify({'error': 'Invalid verification token'}), 400
+    try:
+        data = request.get_json()
+        token = data['token']
+        serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET_KEY'])
+        email = serializer.loads(token, salt='email-confirm', max_age=300)
+        print("email verification", email)
+        user = User.query.filter_by(verification_token=token).first()
+        print("user verification", user.email)
+        if user.email == email:
+            user.isVerified = True
+            user.verification_token = None
+            user.save()
+            access_token = create_access_token(identity=user.id, expires_delta=datetime.timedelta(hours=1))
+            send_registration_mail(data=user.language, mauticId=user.mauticId)
+            return jsonify({'accessToken': access_token, 'userId':user.id, 'userIndex':user.index, 'firstName':user.first_name, 'lastName':user.last_name, 'role':user.role, 'plan':user.billing_plan, 'status':user.status, 'isVerified':user.isVerified}), 200
+        return jsonify({'message': 'Invalid verification token'}), 400
+    except SignatureExpired:
+        return jsonify({'message': 'The verification link is expired'}), 400

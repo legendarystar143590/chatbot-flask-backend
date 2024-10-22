@@ -137,10 +137,12 @@ def detect_language(text):
 def get_answer(bot_id, session_id, query, knowledge_base):
     try:
         bot = Bot.get_by_id(bot_id)
+        query_language = detect_language(query)
+        print(query_language)
         starter = f"""
         Q:
         Please follow these guidelines when responding:
-        1. Always reply in the language of the human_input.
+        1. Always reply in the language of the human_input if {query_language}'s not English.
         2. Determine if the user's query is technical or general.
         3. For technical queries:
         - Summarize the context and provide relevant information if available.

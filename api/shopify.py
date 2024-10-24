@@ -32,12 +32,13 @@ def install():
     timestamp = request.args.get('timestamp')
     hmac_header = request.args.get('hmac')
     state = request.args.get('state')
+    print("shop", shop)
     # Verify the webhook using the provided parameters
     data = f'shop={shop}&timestamp={timestamp}&state={state}'.encode('utf-8')
-    if verify_webhook(data, hmac_header) == False:
+    if verify_webhook(data, hmac_header):
         # Store the shop code and state securely (implement your own storage logic)
         store_shop_data(shop, state)
-
+        print("Verification successful")
         # Redirect to Shopify authorization URL
         return redirect(f'https://{shop}/admin/oauth/authorize?client_id={SHOPIFY_API_KEY}&scope=read_products&redirect_uri={REDIRECT_URI}&state={state}')
     
@@ -50,11 +51,13 @@ def auth_callback():
     state = request.args.get('state')
     timestamp = request.args.get('timestamp')
     hmac_header = request.args.get('hmac')
-
+    print("shop", shop)
     data = f'shop={shop}&code={code}&state={state}&timestamp={timestamp}'.encode('utf-8')
     # Verify that state matches what was stored during installation
     if verify_webhook(data, hmac_header):
+        print("Verification successful")
         if verify_state(shop, state):
+            print("State verification successful")
             # Store the hashed code with the shop code securely (implement your own storage logic)
             access_token = get_access_token(shop, code)
             store_hashed_code(shop, code, access_token)

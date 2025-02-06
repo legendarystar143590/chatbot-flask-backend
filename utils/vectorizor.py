@@ -182,7 +182,8 @@ def get_answer(bot_id, session_id, query, knowledge_base, website):
         6. Your name is {bot.name}. Remember this throughout the conversation, and if asked, state your name.
         7. If the human's input is about a product and there is product information in the context:
         - Include relevant details about the product in your response, such as the product name, vendor, category, price, and inventory quantity.
-         - At the end of your response, add the URL information included ".jpg", ".png" or other image format that exist in image part of products information.
+        - At the end of your response, add the URL information included ".jpg", ".png" or other image format that exist in image part of products information.
+        - If the human's input is about a product but you can't find products information from knowledge base, don't add image URL at your response.
 
         Note: Ensure that all responses, including the translated default message, are in the language of the human_input.
         human_input:{query}
@@ -206,7 +207,7 @@ def get_answer(bot_id, session_id, query, knowledge_base, website):
         docsearch = PineconeVectorStore.from_existing_index(
                 index_name='knowledge-base', embedding=embeddings)
         
-        print("docsearch", docsearch)
+        # print("docsearch", docsearch)
         
         docs = []
         if knowledge_base !="-1":        
@@ -233,12 +234,12 @@ def get_answer(bot_id, session_id, query, knowledge_base, website):
             # docs = docsearch.similarity_search(query, k=3, filter=condition)
             # print("Got here1  >>>", docs)
 
-        print("docs", docs)
+        # print("docs", docs)
 
         llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo-0125", openai_api_key=OPENAI_API_KEY, streaming=True)
         memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input")
         stuff_chain = load_qa_chain(llm, chain_type="stuff", prompt=prompt, memory=memory)
-        print("stuff_chain", stuff_chain)
+        # print("stuff_chain", stuff_chain)
         latest_chat_history = Conversation.get_latest_by_session(session_id)
         # print(docs)
         reduce_chat_history = ""

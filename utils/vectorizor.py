@@ -252,7 +252,7 @@ def get_answer(bot_id, session_id, query, knowledge_base, website):
             else:
                 record.delete()
         output = stuff_chain.invoke({"input_documents": docs, "human_input": query}, return_only_outputs=False)
-        print("output", output)
+        # print("output", output)
         new_conv = Conversation(query, output["output_text"], bot_id, session_id)
         new_conv.save()
         return output["output_text"]

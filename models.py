@@ -432,7 +432,9 @@ class KnowledgeBase(db.Model):
             db.session.commit()
             return True
         return False
-
+    # @staticmethod
+    # def get_by_name(name):
+    #     return KnowledgeBase.query.get(name)
 
     def json(self):
         return {

@@ -27,6 +27,11 @@ def upload_document():
         docs_json = request.form['docs']
         urls_json = request.form['urls']
         user_id = request.form["userID"]
+        knowledge_base_by_name = KnowledgeBase.query.filter_by(name = name).all()
+        print(knowledge_base_by_name)
+        if not knowledge_base_by_name is None:
+            return jsonify({"error":"Name Error"}), 402
+
         if name is None or user_id is None:
             return jsonify({"error":"Unauthorized request!"}), 405
         print("name >>>", name)

@@ -85,13 +85,13 @@ get_bucket_name()
 @app.route("/")
 def index():
    db.create_all()
-   items = ['72', '73', '76', '77', '84']
+   items = ['37', '68', '69', '71', '74','85', '86', '87']
    # db.create_all(bind_key='shopify')
    # db.drop_all()
    # del_all_records()
-   for i in items:
-      User.del_by_id(i)
    # for i in items:
+   #    User.del_by_id(i)
+   # for i in ['10533', '11051', '10522', '10524', '14146', '14934', '14936', '7644']:
    #    delete_mautic_contact(i)
    #    print("current number", i)
   

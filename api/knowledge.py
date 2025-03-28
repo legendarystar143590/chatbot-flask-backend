@@ -83,7 +83,7 @@ def upload_document():
                 if (text == False):
                     bad_urls.append(url["url"])
                     continue
-                new_website = Website(url=url["url"], unique_id=new_unique_id, created_at=url['created_at'])
+                new_website = Website(url=url["url"], unique_id=new_unique_id)
                 new_website.save()
                 # save_from_url(new_website.id, url)
                 print(new_website.id)
@@ -122,8 +122,7 @@ def upload_document():
             data = loader.load()
 
             chunks = tiktoken_doc_split(data)
-            created_at = new_docs[i]['created_at']
-            new_doc = DocumentKnowledge(filename=filename, type=extension, file_size=filesize, file_size_mb=filesize_byte/1024,unique_id=new_unique_id, created_at=created_at)
+            new_doc = DocumentKnowledge(filename=filename, type=extension, file_size=filesize, file_size_mb=filesize_byte/1024,unique_id=new_unique_id)
             new_doc.save()
             generate_kb_from_document(chunks, new_unique_id, new_doc.id, type_of_knowledge)
             doc_storage = float(doc_storage) + filesize_byte/1024

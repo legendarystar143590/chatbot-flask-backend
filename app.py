@@ -70,7 +70,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(func=scheduled_task, trigger="interval", minutes=60)
 scheduler.start()
 # CORS(app, supports_credentials=True, origins=['https://your-frontend-domain.com'])
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "*", "expose_headers": "*"}})
 
 app.register_blueprint(user_blueprint, url_prefix='/api')
 app.register_blueprint(bot_blueprint, url_prefix='/api')
